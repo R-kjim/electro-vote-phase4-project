@@ -7,7 +7,7 @@ const Navbar = () => {
     <nav className="custom-navbar">
       <ul>
         <li><Link to="/">Home</Link></li>
-        <li><Link to="/elections">Election Results</Link></li>
+        <li><Link to="/elections-results">Election Results</Link></li>
         <li><Link to="/login-signup">Login/Signup</Link></li>
       </ul>
     </nav>
