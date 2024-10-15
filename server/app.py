@@ -1,10 +1,11 @@
-from models import db,User,Constituency,County,Ward
+from models import db,User,Constituency,County,Ward,Voter,Candidate
 from flask_migrate import Migrate
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
-import os
 from flask_bcrypt import Bcrypt
-
+from flask_jwt_extended import JWTManager,create_access_token, create_refresh_token,jwt_required,get_jwt_identity
+import secrets,datetime,os
+from datetime import timedelta
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get(
@@ -13,6 +14,7 @@ DATABASE = os.environ.get(
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] =secrets.token_hex(32)
 app.json.compact = False
 
 migrate = Migrate(app, db)
@@ -20,6 +22,7 @@ migrate = Migrate(app, db)
 db.init_app(app)
 api=Api(app)
 bcrypt = Bcrypt(app)
+jwt=JWTManager(app)
 
 class Signup(Resource):
     def post(self):
@@ -175,19 +178,128 @@ class Ward_By_Id(Resource):
                     setattr(ward,attr,data[attr])
                 db.session.add(ward)
                 db.session.commit()
+                return make_response(ward.to_dict(),201)
             return make_response({"errors":["Invalid name value"]},404)
         return make_response({"error":[f"Ward {id} does not exist"]},404)
-
 api.add_resource(Ward_By_Id,'/ward/<int:id>')
-    
 
-# dict1={"a":"names","b":2}
-# dict2={}
-# print(dict1)
-# for key,value in dict1.items():
-#     if key=='a' and len(value)>3:
-#         dict2[key]=value
-# print(dict2)
+class Login(Resource):
+    def post(self):
+        data=request.get_json()
+        email=data["email"]
+        password=data["password"]
+        user=User.query.filter_by(email=email).first()
+        if user:
+            if bcrypt.check_password_hash(user.password, password):
+                access_token=create_access_token(identity={"email":email}, expires_delta=timedelta(minutes=30))
+                return {"access_token":access_token}
+            return make_response({"error":["Wrong password"]})
+        return make_response({"error":[f"{email} not registered. Proceed to signup?"]},404)
+api.add_resource(Login,'/login')
+
+class Voter_Details(Resource):
+    # @jwt_required()
+    def post(self,id):
+        data=request.get_json()
+        national_id=data["national_id"]
+        registration_date=datetime.datetime.now()
+        voter=Voter.query.filter_by(national_id=national_id).first()
+        voter1=Voter.query.filter_by(user_id=id).first()
+        if voter or voter1:
+            return make_response({"error":[f"{national_id} is already registered as a voter"]},404)
+        if len(str(national_id))==8 :
+            new_voter=Voter(
+                national_id=national_id,registration_date=registration_date,
+                user_id=id,
+                county_id=data["county_id"],
+                constituency_id=data["constituency_id"],
+                ward_id=data["ward_id"]
+                )
+            db.session.add(new_voter)
+            db.session.commit()
+            return make_response(new_voter.to_dict(),201)
+        return make_response({"error":["Invalid data entry"]})
+    @jwt_required()
+    def patch(self,id):
+        data=request.get_json()
+        voter=Voter.query.filter_by(id=id).first()
+        if voter:
+            national_id=data["national_id"]
+            if len(str(national_id))==8 and isinstance(str,national_id):
+                for attr in data:
+                    setattr(voter,attr,data[attr])
+            db.session.add(voter)
+            db.session.commit()
+            return make_response(voter.to_dict(),200)
+    # @jwt_required()
+    def get(self,id):
+        voter=Voter.query.filter_by(id=id).first()
+        if voter:
+            return make_response(voter.to_dict(),200)
+        else:
+            return make_response({"error":["Voter doesn't exist"]})
+api.add_resource(Voter_Details,'/add-voter-details/<int:id>')
+
+class Add_Get_Candidate(Resource):
+    # @jwt_required
+    def post(self):
+        data=request.get_json()
+        positions=['President',"Governor","Senator","Member of Parliament","MCA"]
+        position=data["position"]
+        voter_id=data["voter_id"]
+        voter=Voter.query.filter_by(id=voter_id).first()
+        if voter:
+            if position in positions:
+                candidate=Candidate(position=position,voter_id=voter_id)
+                if candidate:
+                    db.session.add(candidate)
+                    db.session.commit()
+                    return make_response(candidate.to_dict(),201)
+                else:
+                    return make_response({"error":["An error occured. Kindly try again later"]},500)
+            else:
+                return make_response({"error":[f"Select a position from {positions}"]})
+        else:
+            return make_response({"error":["Not a registered voter"]},404)
+    
+    def get(self):
+        candidates=Candidate.query.filter_by(id=id).all()
+        return make_response([candidate.to_dict() for candidate in candidates],200)
+api.add_resource(Add_Get_Candidate,'/candidates')
+
+class Candidate_By_Id(Resource):
+    def get(self,id):
+        candidate=Candidate.query.filter_by(id=id).first()
+        if candidate:
+            return make_response(candidate.to_dict(),200)
+        else:
+            return make_response({"error":[f"Candidate {id} not found"]},404)
+    def patch(self,id):
+        candidate=Candidate.query.filter_by(id=id).first()
+        if candidate:
+            data=request.get_json()
+            position=data["position"]
+            if position in ['President',"Governor","Senator","Member of Parliament","MCA"]:
+                for attr in data:
+                    setattr(candidate,attr,data[attr])
+                db.session.add(candidate)
+                db.session.commit()
+                return make_response(candidate.to_dict(),200)
+            else:
+                return make_response({"error":[f"Select a position from ['President','Governor','Senator','Member of Parliament','MCA']"]},400)
+        else:
+            return make_response({"error":[f"Candidate {id} not found"]},404)
+    def delete(self,id):
+        candidate=Candidate.query.filter_by(id=id).first()
+        if candidate:
+            db.session.delete(candidate)
+            db.session.commit()
+            return make_response({"message":["Candidate deleted successfully"]},204)
+        else:
+            return make_response({"error":[f"Candidate {id} not found"]},404)
+api.add_resource(Candidate_By_Id,'/candidate/<int:id>')
+
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
 
