@@ -17,17 +17,17 @@ const App = () => {
   }, []);
 
   return (
-    <Router>
+    <div>
       <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route 
-          path="/login-signup" 
-          element={<LoginSignup isAdminAvailable={isAdminAvailable} />} 
+          path="/login" 
+          element={<LoginSignup />} 
         />
         <Route path='elections-results' element={<ElectionResults />}/>
       </Routes>
-    </Router>
+    </div>
   );
 };
 
