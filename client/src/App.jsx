@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Homepage from './components/Homepage';
 import LoginSignup from './components/LoginSignup';
+import ElectionResults from './pages/ElectionResults';
 
 
 const App = () => {
@@ -24,7 +25,7 @@ const App = () => {
           path="/login-signup" 
           element={<LoginSignup isAdminAvailable={isAdminAvailable} />} 
         />
-        {/* Add more routes here as needed */}
+        <Route path='elections-results' element={<ElectionResults />}/>
       </Routes>
     </Router>
   );
