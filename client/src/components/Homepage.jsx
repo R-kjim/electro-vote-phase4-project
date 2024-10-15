@@ -8,14 +8,7 @@ import results from '../assets/results.png';
 const Homepage = () => {
   const [elections, setElections] = useState([]);
 
-  useEffect(() => {
-    // Fetch available elections from the backend
-    // Placeholder data for now
-    setElections([
-      { id: 1, name: "Presidential Election", status: "Ongoing", hasVoted: false },
-      { id: 2, name: "Senate Election", status: "Upcoming", hasVoted: false },
-    ]);
-  }, []);
+ 
 
   return (
     <div>
