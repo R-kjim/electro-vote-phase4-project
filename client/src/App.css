@@ -1,10 +1,10 @@
-#root {
+/* #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-}
-
+} */
+/* 
 body {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   margin: 0;
@@ -148,6 +148,7 @@ button:hover {
 }
 
 /* Navbar Styles */
+/* 
 .custom-navbar {
   position: fixed;
   top: 0;
@@ -187,4 +188,4 @@ button:hover {
 
 body {
   padding-top: 80px;
-}
+} */ 
