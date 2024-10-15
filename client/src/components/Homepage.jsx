@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import '../App.css'; // Import the CSS file
+import registration from '../assets/registration.png';
+import candidates from '../assets/candidates.png';
+import results from '../assets/results.png';
 
 const Homepage = () => {
   const [elections, setElections] = useState([]);
@@ -16,41 +20,30 @@ const Homepage = () => {
   return (
     <div>
       <div className="main-banner">
-        <h1> Make you vote count!!</h1>
-              </div>
+        <h1>Make your vote count!</h1>
+      </div>
 
       <section className="main-content">
-        <a href="#">
-          <img src="registration-icon.png" alt="Registration" />
+        <Link to="/login-signup"> {/* Link to LoginSignup.jsx */}
+          <img src={registration} alt="Registration" />
           <p>Registration</p>
-        </a>
-        
-        <a href="#">
-          <img src="election-results-icon.png" alt="Election Results" />
-          <p>Election Results</p>
-        </a>
+        </Link>
 
-        <a href="#">
-          <img src="ballot-icon.png" alt="What's on the Ballot" />
+        <Link to="/election-results"> {/* Link to Election Results page (adjust as needed) */}
+          <img src={results} alt="Election Results" />
+          <p>Election Results</p>
+        </Link>
+
+        <Link to="/candidates"> {/* Link to Candidates page (adjust as needed) */}
+          <img src={candidates} alt="What's on the Ballot" />
           <p>What's on the Ballot</p>
-        </a>
-       
+        </Link>
       </section>
 
-      <h1>Available Elections</h1>
-      <ul>
-        {elections.map((election) => (
-          <li key={election.id}>
-            {election.name} - {election.status}
-            {election.status === 'Ongoing' && !election.hasVoted && (
-              <button>Vote Now</button>
-            )}
-            {election.hasVoted && <span> (Already Voted)</span>}
-          </li>
-        ))}
-      </ul>
+      
     </div>
   );
 };
 
 export default Homepage;
+
