@@ -23,7 +23,7 @@ class User(db.Model, SerializerMixin):
     voter = db.relationship('Voter', back_populates='user')
 
     # #serialize rules
-    serialize_rules=('-voter','-candidate.user')
+    serialize_rules=('-voter.user','-candidate.user','-password')
 # 
 # 
 class Voter(db.Model, SerializerMixin):
@@ -82,7 +82,7 @@ class County(db.Model, SerializerMixin):
     #serialize_rules
     serialize_rules=('-constituencies.county','-wards.county','-voters','-constituencies.wards',
                      '-constituencies.county_id','-constituencies.id','-wards.constituency',
-                     '-wards.constituency_id','-wards.county_id','-wards.id','-id')
+                     '-wards.constituency_id','-wards.county_id','-wards.id')
 # 
 # Constituency model
 class Constituency(db.Model, SerializerMixin):
@@ -97,7 +97,7 @@ class Constituency(db.Model, SerializerMixin):
     wards=db.relationship("Ward",back_populates='constituency')
     #serialize rules
     serialize_rules=('-county.constituencies','-wards.constituency','-county.wards',
-                     '-voters','-id','-county_id','-wards.constituency_id','-wards.county_id',
+                     '-voters','-county_id','-wards.constituency_id','-wards.county_id',
                      '-wards.county','-wards.id')
 # 
 # Ward model
@@ -114,7 +114,7 @@ class Ward(db.Model, SerializerMixin):
     voters = db.relationship('Voter', back_populates='ward')
     #serialize rules
     serialize_rules=('-county.wards','-county.constituencies','-constituency.wards','-constituency.county','-constituency.county_id',
-                     '-voters','-constituency_id','-id','-county_id')
+                     '-voters','-constituency_id','-county_id')
     
 # 
 # 
