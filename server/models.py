@@ -52,8 +52,7 @@ class Voter(db.Model, SerializerMixin):
                       '-constituency.county_id','-constituency.voters','-constituency.county','-constituency.wards','-constituency.id',
                       '-candidate.voter'
                       )
-# 
-# 
+#candidates model 
 class Candidate(db.Model, SerializerMixin):
     __tablename__ = 'candidates'
     
@@ -69,24 +68,7 @@ class Candidate(db.Model, SerializerMixin):
     #serialise rules
     serialize_rules=('-user.candidate','-voter.candidate')
 
-# 
-# Vote model
-# class Vote(db.Model, SerializerMixin):
-    # __tablename__ = 'votes'
-# 
-    # id = db.Column(db.Integer, primary_key=True)
-    # vote_date = db.Column(db.DateTime, default=db.func.now())
-    # voting_status = db.Column(db.Boolean, default=False)
-    # voter_id = db.Column(db.Integer, db.ForeignKey('voters.id'))
-    # position_id = db.Column(db.Integer, db.ForeignKey('positions.id'))
-    # candidate_id = db.Column(db.Integer, db.ForeignKey('candidates.id'))
-# 
-    # Relationships
-    # voter = db.relationship('Voter', back_populates='votes')
-    # position = db.relationship('Position', back_populates='votes')
-    # candidate = db.relationship('Candidate', back_populates='votes')
-# 
-# # 
+
 #County model
 class County(db.Model, SerializerMixin):
     __tablename__ = 'counties'
@@ -144,3 +126,21 @@ class Ward(db.Model, SerializerMixin):
     # name = db.Column(db.String)
     # candidates = db.relationship('Candidate', back_populates='position')
 # 
+# 
+# Vote model
+# class Vote(db.Model, SerializerMixin):
+    # __tablename__ = 'votes'
+# 
+    # id = db.Column(db.Integer, primary_key=True)
+    # vote_date = db.Column(db.DateTime, default=db.func.now())
+    # voting_status = db.Column(db.Boolean, default=False)
+    # voter_id = db.Column(db.Integer, db.ForeignKey('voters.id'))
+    # position_id = db.Column(db.Integer, db.ForeignKey('positions.id'))
+    # candidate_id = db.Column(db.Integer, db.ForeignKey('candidates.id'))
+# 
+    # Relationships
+    # voter = db.relationship('Voter', back_populates='votes')
+    # position = db.relationship('Position', back_populates='votes')
+    # candidate = db.relationship('Candidate', back_populates='votes')
+# 
+# # 
