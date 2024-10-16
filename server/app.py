@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager,create_access_token, create_refresh_token,jwt_required,get_jwt_identity
 import secrets,datetime,os
 from datetime import timedelta
+from flask_cors import CORS
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get(
@@ -15,6 +16,8 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] =secrets.token_hex(32)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)  
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)  
 app.json.compact = False
 
 migrate = Migrate(app, db)
@@ -23,6 +26,8 @@ db.init_app(app)
 api=Api(app)
 bcrypt = Bcrypt(app)
 jwt=JWTManager(app)
+
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 class Signup(Resource):
     def post(self):
@@ -191,8 +196,10 @@ class Login(Resource):
         user=User.query.filter_by(email=email).first()
         if user:
             if bcrypt.check_password_hash(user.password, password):
-                access_token=create_access_token(identity={"email":email}, expires_delta=timedelta(minutes=30))
-                return {"access_token":access_token}
+                access_token=create_access_token(identity={"email":user.id})
+                refresh_token=create_refresh_token(identity=user.id)
+
+                return make_response({"access_token":access_token,"refresh_token":refresh_token},200)
             return make_response({"error":["Wrong password"]})
         return make_response({"error":[f"{email} not registered. Proceed to signup?"]},404)
 api.add_resource(Login,'/login')

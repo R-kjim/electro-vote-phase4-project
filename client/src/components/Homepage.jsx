@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { FaUserPlus, FaVoteYea, FaCheckCircle, FaPoll } from 'react-icons/fa';
+import kenya from '../assets/kenya.jpeg'
+import { Link } from 'react-router-dom';
+import { AppContext } from '../../AppContext';
 
 const Homepage = () => {
+  const value=useContext(AppContext)
+  const setIsRegistering=value.setIsRegistering
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
@@ -9,13 +14,13 @@ const Homepage = () => {
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">Welcome to Electra-Vote</h1>
           <p className="text-xl mb-6">Building Democracy with Secure, Online Elections</p>
-          <a href="/register" className="bg-orange-400 hover:bg-orange-500 text-white py-2 px-6 rounded-md font-semibold">
+          <Link to="/login" className="bg-orange-400 hover:bg-orange-500 text-white py-2 px-6 rounded-md font-semibold" onClick={()=>setIsRegistering(true)}>
             Get Started
-          </a>
+          </Link>
         </div>
-        <div className="mt-8">
-          <img src="your-image-url-here" alt="Voting banner" className="mx-auto w-full h-auto" />
-        </div>
+        {/* <div className="mt-8">
+          <img src={kenya} alt="Voting banner" className="mx-auto w-full h-auto" />
+        </div> */}
       </section>
       {/* How It Works Section */}
       <section className="py-16">

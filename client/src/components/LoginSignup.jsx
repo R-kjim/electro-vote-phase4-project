@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { AppContext } from '../../AppContext';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const LoginSignup = () => {
-  const [isRegistering, setIsRegistering] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     repeatPassword: '',
   });
+  const value=useContext(AppContext)
+  const isRegistering=value.isRegistering
+  const setIsRegistering=value.setIsRegistering
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,15 +21,50 @@ const LoginSignup = () => {
       [name]: value,
     });
   };
+  const navigate=useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isRegistering) {
-      // Handle registration logic here
-      console.log('Registering:', formData);
+      if(formData.password!==formData.repeatPassword){
+        toast.error("Passwords do not match")
+      }else{
+        fetch("http://127.0.0.1:5555/signup",{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json"
+          },
+          body:JSON.stringify(formData)
+        }).then(res=>{
+          if(res.ok){
+            toast.success("Registration successful. Proceed to login")
+            setIsRegistering(false)
+            return res.json()
+          }else{
+            return res.json().then(errorData=>{
+              toast.error(errorData.error[0])
+            })
+          }
+        })
+        .then(data=>console.log(data))
+        .catch(error=>console.log(error))
+      }
     } else {
-      // Handle login logic here
-      console.log('Logging in:', formData);
+      const loginData={"email":formData.email,"password":formData.password}
+      fetch("http://127.0.0.1:5555/login",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify(loginData)
+      })
+      .then(res=>{
+        if(res){
+          navigate('/dashboard')
+          return res.json()
+        }
+      })
+      .then(data=>value.setUserData(data))
     }
   };
 

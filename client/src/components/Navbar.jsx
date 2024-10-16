@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { AppContext } from '../../AppContext';
+import {Link} from 'react-router-dom'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -6,6 +8,8 @@ const Navbar = () => {
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+  const value=useContext(AppContext)
+  const setIsRegistering=value.setIsRegistering
 
   return (
     <nav className="bg-blue-700">
@@ -13,27 +17,27 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
           <div className="flex-shrink-0">
-            <a href="/" className="text-white text-2xl font-bold">
+            <Link to="/" className="text-white text-2xl font-bold">
               Electra-Vote
-            </a>
+            </Link>
             <p className="text-sm text-gray-200">Building Democracy</p>
           </div>
 
           {/* Desktop Links */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <a href="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
+              <Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
                 Home
-              </a>
-              <a href="/register" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
+              </Link>
+              <Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(true)}>
                 Register
-              </a>
-              <a href="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
+              </Link>
+              <Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(false)}>
                 Login
-              </a>
-              <a href="/results" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
+              </Link>
+              <Link to="/results" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
                 View Results
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -66,18 +70,18 @@ const Navbar = () => {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a href="/" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
+            <Link to="/" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
               Home
-            </a>
-            <a href="/register" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
+            </Link>
+            <Link to="/register" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
               Register
-            </a>
-            <a href="/login" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
+            </Link>
+            <Link to="/login" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
               Login
-            </a>
-            <a href="/results" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
+            </Link>
+            <Link to="/results" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
               View Results
-            </a>
+            </Link>
           </div>
         </div>
       )}
