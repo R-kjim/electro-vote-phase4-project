@@ -1,24 +1,24 @@
-import React, { useContext, useEffect } from 'react';
-import { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { UserIcon, CheckCircleIcon, ExclamationCircleIcon, CalendarIcon, ChartBarIcon, DocumentIcon } from '@heroicons/react/outline';
 import { AppContext } from '../../AppContext';
 import { Link, Outlet, useParams } from 'react-router-dom';
 
 const Dashboard = () => {
-    const value=useContext(AppContext)
-    let params=useParams()
-    params=params.id
-    useEffect(()=>{
+  const navigate = useNavigate(); // Initialize useNavigate
+  const value=useContext(AppContext)
+  let params=useParams()
+  params=params.id
+  useEffect(()=>{
        value.setParam(params)
     },[])
-  // Dummy user data for now
-  const user = {
-    name: "John Doe",
-    isVoter: true, // Change this to true to see the registered voter state
+  const handleElectionClick = (electionId) => {
+    navigate(`/election-details/${electionId}`); // Navigate to ElectionDetails with the electionId
   };
 
   const userData=value.userData
   const isRegisteredVoter=value.isRegisteredVoter
+
   return (
     <div className="container mx-auto p-6">
       {/* Welcome Section */}
@@ -65,17 +65,17 @@ const Dashboard = () => {
         <h2 className="text-2xl font-bold mb-4">Upcoming Elections</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Sample elections */}
-          <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center">
+          <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(1)}>
             <CalendarIcon className="h-10 w-10 text-indigo-500 mr-4" />
             <div>
-              <h3 className="text-xl font-semibold">Presidential Election</h3>
+              <h3 className="text-xl font-semibold">General Elections</h3>
               <p className="mt-2 text-gray-600">Date: 20th November 2024</p>
             </div>
           </div>
-          <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center">
+          <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(2)}>
             <CalendarIcon className="h-10 w-10 text-indigo-500 mr-4" />
             <div>
-              <h3 className="text-xl font-semibold">Local Referendum</h3>
+              <h3 className="text-xl font-semibold">Runoff Election</h3>
               <p className="mt-2 text-gray-600">Date: 5th December 2024</p>
             </div>
           </div>
