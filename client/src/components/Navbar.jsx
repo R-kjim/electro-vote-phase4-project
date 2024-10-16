@@ -10,7 +10,7 @@ const Navbar = () => {
   };
   const value=useContext(AppContext)
   const setIsRegistering=value.setIsRegistering
-
+  const isLoggedIn=value.loginStatus
   return (
     <nav className="bg-blue-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,15 +29,21 @@ const Navbar = () => {
               <Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
                 Home
               </Link>
-              <Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(true)}>
-                Register
-              </Link>
-              <Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(false)}>
-                Login
-              </Link>
               <Link to="/results" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
                 View Results
               </Link>
+             { isLoggedIn?
+             <><Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>{localStorage.removeItem("userId") 
+             value.setLoginStatus(false)}}>
+             Logout
+            </Link></>:
+             <><Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(true)}>
+             Register
+           </Link>
+           <Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(false)}>
+             Login
+           </Link></>}
+              
             </div>
           </div>
 
@@ -73,15 +79,21 @@ const Navbar = () => {
             <Link to="/" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
               Home
             </Link>
-            <Link to="/register" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
+            <Link to="/results" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
+              View Results
+            </Link>
+            {isLoggedIn?
+            <><Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>{localStorage.removeItem("userId")
+              value.setLoginStatus(false)
+            }}>
+            Logout
+           </Link></>
+            :<><Link to="/login" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400" onClick={()=>setIsRegistering(true)}>
               Register
             </Link>
             <Link to="/login" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
               Login
-            </Link>
-            <Link to="/results" className="block text-white px-3 py-2 rounded-md text-base font-medium hover:text-orange-400">
-              View Results
-            </Link>
+            </Link></>}
           </div>
         </div>
       )}

@@ -1,18 +1,24 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 import { UserIcon, CheckCircleIcon, ExclamationCircleIcon, CalendarIcon, ChartBarIcon, DocumentIcon } from '@heroicons/react/outline';
 import { AppContext } from '../../AppContext';
+import { Link, Outlet, useParams } from 'react-router-dom';
 
 const Dashboard = () => {
+    const value=useContext(AppContext)
+    let params=useParams()
+    params=params.id
+    useEffect(()=>{
+       value.setParam(params)
+    },[])
   // Dummy user data for now
   const user = {
     name: "John Doe",
-    isVoter: false, // Change this to true to see the registered voter state
+    isVoter: true, // Change this to true to see the registered voter state
   };
 
-  const [isRegisteredVoter, setIsRegisteredVoter] = useState(user.isVoter);
-  const value=useContext(AppContext)
-  console.log(value.userData)
+  const userData=value.userData
+  const isRegisteredVoter=value.isRegisteredVoter
   return (
     <div className="container mx-auto p-6">
       {/* Welcome Section */}
@@ -20,7 +26,7 @@ const Dashboard = () => {
         <div className="flex items-center">
           <UserIcon className="h-12 w-12 text-white mr-4" />
           <div>
-            <h1 className="text-4xl font-bold">Welcome, {user.name}!</h1>
+            <h1 className="text-4xl font-bold">Welcome, {userData.name}!</h1>
             <p className="mt-2">
               {isRegisteredVoter
                 ? "Thank you for being a registered voter!"
@@ -46,9 +52,9 @@ const Dashboard = () => {
             <div>
               <h2 className="text-2xl font-semibold">Complete Your Registration</h2>
               <p className="mt-1">You need to complete your registration to vote in upcoming elections.</p>
-              <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"><Link to='/dashboard/update-details' >
                 Complete Registration
-              </button>
+              </Link></button>
             </div>
           </div>
         )}
@@ -104,10 +110,10 @@ const Dashboard = () => {
               </button>
             </>
           ) : (
-            <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            <Link to='/dashboard/update-details' className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
               <UserIcon className="h-6 w-6 mr-2" />
               Complete Voter Registration
-            </button>
+            </Link>
           )}
         </div>
       </div>

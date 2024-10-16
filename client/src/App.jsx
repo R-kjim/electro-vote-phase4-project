@@ -8,6 +8,8 @@ import { AppContext } from '../AppContext';
 import Dashboard from './pages/Dashboard';
 import { ToastContainer } from "react-toastify"
 import 'react-toastify/dist/ReactToastify.css';
+import UpdateDetails from './pages/UpdateDetails';
+import DashboardMain from './pages/DashboardMain';
 
 
 
@@ -33,7 +35,10 @@ const App = () => {
           element={<LoginSignup />} 
         />
         <Route path='elections-results' element={<ElectionResults />}/>
-        <Route path='/dashboard' element={<Dashboard />} />
+        <Route path='/dashboard/' element={<DashboardMain />} >
+          <Route path='user/:id' element={<Dashboard />}/>
+          <Route path='update-details' element={<UpdateDetails />} />
+        </Route>
       </Routes>
     </div>
   );
