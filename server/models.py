@@ -23,7 +23,7 @@ class User(db.Model, SerializerMixin):
     voter = db.relationship('Voter', back_populates='user')
 
     # #serialize rules
-    serialize_rules=('-voter','-candidate.user')
+    serialize_rules=('-voter.user','-candidate.user','-password')
 # 
 # 
 class Voter(db.Model, SerializerMixin):
@@ -52,8 +52,7 @@ class Voter(db.Model, SerializerMixin):
                       '-constituency.county_id','-constituency.voters','-constituency.county','-constituency.wards','-constituency.id',
                       '-candidate.voter'
                       )
-# 
-# 
+#candidates model 
 class Candidate(db.Model, SerializerMixin):
     __tablename__ = 'candidates'
     
@@ -69,6 +68,64 @@ class Candidate(db.Model, SerializerMixin):
     #serialise rules
     serialize_rules=('-user.candidate','-voter.candidate')
 
+
+#County model
+class County(db.Model, SerializerMixin):
+    __tablename__ = 'counties'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    #relationships
+    constituencies=db.relationship('Constituency',back_populates='county')
+    wards=db.relationship("Ward",back_populates='county')
+    voters = db.relationship('Voter', back_populates='county')
+    #serialize_rules
+    serialize_rules=('-constituencies.county','-wards.county','-voters','-constituencies.wards',
+                     '-constituencies.county_id','-constituencies.id','-wards.constituency',
+                     '-wards.constituency_id','-wards.county_id','-wards.id')
+# 
+# Constituency model
+class Constituency(db.Model, SerializerMixin):
+    __tablename__ = 'constituencies'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    #relationships
+    county_id = db.Column(db.Integer, db.ForeignKey('counties.id'))
+    voters = db.relationship('Voter', back_populates='constituency')
+    county=db.relationship('County',back_populates='constituencies')
+    wards=db.relationship("Ward",back_populates='constituency')
+    #serialize rules
+    serialize_rules=('-county.constituencies','-wards.constituency','-county.wards',
+                     '-voters','-county_id','-wards.constituency_id','-wards.county_id',
+                     '-wards.county','-wards.id')
+# 
+# Ward model
+class Ward(db.Model, SerializerMixin):
+    __tablename__= 'wards'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String)
+    #relationships
+    county_id=db.Column(db.Integer,db.ForeignKey('counties.id'))
+    constituency_id = db.Column(db.Integer, db.ForeignKey('constituencies.id'))
+    county=db.relationship("County",back_populates='wards')
+    constituency=db.relationship("Constituency",back_populates='wards')
+    voters = db.relationship('Voter', back_populates='ward')
+    #serialize rules
+    serialize_rules=('-county.wards','-county.constituencies','-constituency.wards','-constituency.county','-constituency.county_id',
+                     '-voters','-constituency_id','-county_id')
+    
+# 
+# 
+# Position model
+# class Position(db.Model, SerializerMixin):
+    # __tablename__ = 'positions'
+# 
+    # id = db.Column(db.Integer, primary_key=True)
+    # name = db.Column(db.String)
+    # candidates = db.relationship('Candidate', back_populates='position')
+# 
 # 
 # Vote model
 # class Vote(db.Model, SerializerMixin):
@@ -87,60 +144,3 @@ class Candidate(db.Model, SerializerMixin):
     # candidate = db.relationship('Candidate', back_populates='votes')
 # 
 # # 
-#County model
-class County(db.Model, SerializerMixin):
-    __tablename__ = 'counties'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    #relationships
-    constituencies=db.relationship('Constituency',back_populates='county')
-    wards=db.relationship("Ward",back_populates='county')
-    voters = db.relationship('Voter', back_populates='county')
-    #serialize_rules
-    serialize_rules=('-constituencies.county','-wards.county','-voters','-constituencies.wards',
-                     '-constituencies.county_id','-constituencies.id','-wards.constituency',
-                     '-wards.constituency_id','-wards.county_id','-wards.id','-id')
-# 
-# Constituency model
-class Constituency(db.Model, SerializerMixin):
-    __tablename__ = 'constituencies'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    #relationships
-    county_id = db.Column(db.Integer, db.ForeignKey('counties.id'))
-    voters = db.relationship('Voter', back_populates='constituency')
-    county=db.relationship('County',back_populates='constituencies')
-    wards=db.relationship("Ward",back_populates='constituency')
-    #serialize rules
-    serialize_rules=('-county.constituencies','-wards.constituency','-county.wards',
-                     '-voters','-id','-county_id','-wards.constituency_id','-wards.county_id',
-                     '-wards.county','-wards.id')
-# 
-# Ward model
-class Ward(db.Model, SerializerMixin):
-    __tablename__= 'wards'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    #relationships
-    county_id=db.Column(db.Integer,db.ForeignKey('counties.id'))
-    constituency_id = db.Column(db.Integer, db.ForeignKey('constituencies.id'))
-    county=db.relationship("County",back_populates='wards')
-    constituency=db.relationship("Constituency",back_populates='wards')
-    voters = db.relationship('Voter', back_populates='ward')
-    #serialize rules
-    serialize_rules=('-county.wards','-county.constituencies','-constituency.wards','-constituency.county','-constituency.county_id',
-                     '-voters','-constituency_id','-id','-county_id')
-    
-# 
-# 
-# Position model
-# class Position(db.Model, SerializerMixin):
-    # __tablename__ = 'positions'
-# 
-    # id = db.Column(db.Integer, primary_key=True)
-    # name = db.Column(db.String)
-    # candidates = db.relationship('Candidate', back_populates='position')
-# 
