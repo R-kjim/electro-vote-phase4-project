@@ -1,28 +1,9 @@
 import React, { useState } from 'react';
 
-const ElectionDetails = ({ isRunoff }) => {
+const ElectionDetails = () => {
     const [selectedPosition, setSelectedPosition] = useState('');
 
-    const positions = isRunoff ? 
-    [
-        {
-            name: "President",
-            candidates: [
-                {
-                    name: "Juma Mwangi",
-                    party: "Kenya United Party",
-                    picture: "path/to/juma-mwangi.jpg",
-                    description: "A visionary leader focused on economic growth and national unity."
-                },
-                {
-                    name: "Wanjiru Karanja",
-                    party: "People's Alliance",
-                    picture: "path/to/wanjiru-karanja.jpg",
-                    description: "Dedicated to health care improvements and youth engagement."
-                }
-            ]
-        }
-    ] : [
+    const positions = [
         {
             name: "President",
             candidates: [
