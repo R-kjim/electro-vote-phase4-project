@@ -60,11 +60,14 @@ const LoginSignup = () => {
       })
       .then(res=>{
         if(res){
-          navigate('/dashboard')
           return res.json()
         }
       })
-      .then(data=>value.setUserData(data))
+      .then(data=>{
+        localStorage.setItem("userId",data.user)
+        navigate(`/dashboard/user/${localStorage.getItem("userId")}`)
+        value.setLoginStatus(true)
+      })
     }
   };
 

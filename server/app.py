@@ -50,6 +50,15 @@ class Signup(Resource):
             return make_response({"error":["validation errors"]},400)
 api.add_resource(Signup,'/signup')
 
+class User_By_Id(Resource):
+    def get(self,id):
+        user=User.query.filter_by(id=id).first()
+        if user:
+            return make_response(user.to_dict(),200)
+        else:
+            return make_response({"error":["User not found"]},404)
+api.add_resource(User_By_Id,'/user/<int:id>')
+
 class Add_Get_County(Resource):
     def get(self):
         counties=County.query.all()
@@ -199,7 +208,7 @@ class Login(Resource):
                 access_token=create_access_token(identity={"email":user.id})
                 refresh_token=create_refresh_token(identity=user.id)
 
-                return make_response({"access_token":access_token,"refresh_token":refresh_token},200)
+                return make_response({"access_token":access_token,"refresh_token":refresh_token,"user":user.id},200)
             return make_response({"error":["Wrong password"]})
         return make_response({"error":[f"{email} not registered. Proceed to signup?"]},404)
 api.add_resource(Login,'/login')
@@ -208,19 +217,22 @@ class Voter_Details(Resource):
     # @jwt_required()
     def post(self,id):
         data=request.get_json()
-        national_id=data["national_id"]
+        national_id=data["nationalId"]
         registration_date=datetime.datetime.now()
         voter=Voter.query.filter_by(national_id=national_id).first()
         voter1=Voter.query.filter_by(user_id=id).first()
+        county=County.query.filter_by(name=data["county"]).first()
+        constituency=Constituency.query.filter_by(name=data["constituency"]).first()
+        ward=Ward.query.filter_by(name=data["ward"]).first()
         if voter or voter1:
             return make_response({"error":[f"{national_id} is already registered as a voter"]},404)
         if len(str(national_id))==8 :
             new_voter=Voter(
                 national_id=national_id,registration_date=registration_date,
                 user_id=id,
-                county_id=data["county_id"],
-                constituency_id=data["constituency_id"],
-                ward_id=data["ward_id"]
+                county_id=county.id,
+                constituency_id=constituency.id,
+                ward_id=ward.id
                 )
             db.session.add(new_voter)
             db.session.commit()
@@ -306,7 +318,16 @@ class Candidate_By_Id(Resource):
             return make_response({"error":[f"Candidate {id} not found"]},404)
 api.add_resource(Candidate_By_Id,'/candidate/<int:id>')
 
-
+class Get_Boundaries(Resource):
+    def get(self):
+        counties=County.query.all()
+        constituencies=Constituency.query.all()
+        all={
+            "counties":[county.to_dict(['name','constituencies']) for county in counties],
+            "constituencies":[constituency.to_dict(['name','wards']) for constituency in constituencies]
+        }
+        return make_response(all,200)
+api.add_resource(Get_Boundaries,'/get-boundaries')
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
 

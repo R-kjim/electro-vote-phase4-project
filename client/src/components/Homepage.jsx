@@ -7,6 +7,7 @@ import { AppContext } from '../../AppContext';
 const Homepage = () => {
   const value=useContext(AppContext)
   const setIsRegistering=value.setIsRegistering
+  console.log(value.userId)
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
