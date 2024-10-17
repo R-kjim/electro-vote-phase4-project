@@ -1,8 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 
 const ElectionDetails = () => {
     const [selectedPosition, setSelectedPosition] = useState('');
+    const [election,setElection]=useState({})
+    const params=useParams()
+    let params1=params.electionId
 
+    //fetch the specific elections data
+    useEffect(()=>{
+        fetch(`http://127.0.0.1:5555/election/${params1}`)
+        .then(res=>res.json())
+        .then(data=>setElection(data))
+    },[])
+    console.log(election)
     const positions = [
         {
             name: "President",

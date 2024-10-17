@@ -1,4 +1,4 @@
-from models import db,User,Constituency,County,Ward,Voter,Candidate
+from models import db,User,Constituency,County,Ward,Voter,Candidate,Election
 from flask_migrate import Migrate
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
@@ -70,7 +70,7 @@ class Add_Get_County(Resource):
         if '  ' not in name and len(name)>3:
             county=County.query.filter_by(name=name).first()
             if county:
-                return make_response({"error":f"{name} county already exists"},404)
+                return make_response({"error":[f"{name} county already exists"]},404)
             new_county=County(name=name)
             if new_county:
                 db.session.add(new_county)
@@ -106,20 +106,24 @@ class Add_Get_Constituency(Resource):
     def post(self):
         data=request.get_json()
         name=data['name']
-        county_id=data['county_id']
-        if '  ' not in name and len(name)>3:
-            constituency=Constituency.query.filter_by(name=name).first()
-            if constituency:
-                return make_response({"error":f"{name} constituency already exists"},404)
-            new_constituency=Constituency(name=name,county_id=county_id)
-            if new_constituency:
-                db.session.add(new_constituency)
-                db.session.commit()
-                return make_response(new_constituency.to_dict(),201)
+        county1=data['county']
+        county=County.query.filter_by(name=county1).first()
+        if county:
+            if '  ' not in name and len(name)>3:
+                constituency=Constituency.query.filter_by(name=name).first()
+                if constituency:
+                    return make_response({"error":[f"{name} constituency already exists"]},404)
+                new_constituency=Constituency(name=name,county_id=county.id)
+                if new_constituency:
+                    db.session.add(new_constituency)
+                    db.session.commit()
+                    return make_response(new_constituency.to_dict(),201)
+                else:
+                    return make_response({"error":["Internal server error"]},500)
             else:
-                return make_response({"error":"Internal server error"},500)
+                return make_response({"error":["Invalid data"]},404)
         else:
-            return make_response({"error":"Invalid data"},404)
+            return make_response({"error":[f"{county1} county not found"]},404)
 api.add_resource(Add_Get_Constituency,'/constituency')
 
 class Constituency_By_Id(Resource):
@@ -153,17 +157,20 @@ class Add_Get_Ward(Resource):
     def post(self):
         data=request.get_json()
         name=data["name"]
-        county_id=data["county_id"]
-        constituency_id=data["constituency_id"]
+        county_id=data["county"]
+        constituency_id=data["constituency"]
+        county=County.query.filter_by(name=county_id).first()
+        constituency=Constituency.query.filter_by(name=constituency_id).first()
         if "  " not in name and len(name)>3:
-            ward=Ward.query.filter_by(id=id).first()
+            ward=Ward.query.filter_by(name=name).first()
             if ward:
-                return make_response({"error":[f"{name} ward already exists"]})
-            new_ward=Ward(name=name, county_id=county_id,constituency_id=constituency_id)
+                return make_response({"error":[f"{name} ward already exists"]},400)
+            new_ward=Ward(name=name, county_id=county.id,constituency_id=constituency.id)
             db.session.add(new_ward)
             db.session.commit()
             return make_response(new_ward.to_dict(),204)
-        return make_response({"error":["Invalid name entry"]},400)
+        else:
+            return make_response({"error":["Invalid name entry"]},400)
     def get(self):
         ward=Ward.query.all()
         return make_response([wards.to_dict() for wards in ward],200)
@@ -208,7 +215,7 @@ class Login(Resource):
                 access_token=create_access_token(identity={"email":user.id})
                 refresh_token=create_refresh_token(identity=user.id)
 
-                return make_response({"access_token":access_token,"refresh_token":refresh_token,"user":user.id},200)
+                return make_response({"access_token":access_token,"refresh_token":refresh_token,"user":user.id,"role":user.role},200)
             return make_response({"error":["Wrong password"]})
         return make_response({"error":[f"{email} not registered. Proceed to signup?"]},404)
 api.add_resource(Login,'/login')
@@ -259,6 +266,12 @@ class Voter_Details(Resource):
             return make_response({"error":["Voter doesn't exist"]})
 api.add_resource(Voter_Details,'/add-voter-details/<int:id>')
 
+class Get_Voters(Resource):
+    def get(self):
+        voters=Voter.query.all()
+        return make_response([voter.to_dict() for voter in voters],200)
+api.add_resource(Get_Voters, '/voters')
+
 class Add_Get_Candidate(Resource):
     # @jwt_required
     def post(self):
@@ -266,10 +279,12 @@ class Add_Get_Candidate(Resource):
         positions=['President',"Governor","Senator","Member of Parliament","MCA"]
         position=data["position"]
         voter_id=data["voter_id"]
+        election1=data["election"]
+        election=Election.query.filter_by(name=election1).first()
         voter=Voter.query.filter_by(id=voter_id).first()
         if voter:
             if position in positions:
-                candidate=Candidate(position=position,voter_id=voter_id)
+                candidate=Candidate(position=position,voter_id=voter_id,election_id=election.id)
                 if candidate:
                     db.session.add(candidate)
                     db.session.commit()
@@ -328,6 +343,48 @@ class Get_Boundaries(Resource):
         }
         return make_response(all,200)
 api.add_resource(Get_Boundaries,'/get-boundaries')
+
+class Add_get_Election(Resource):
+    def post(self):
+        data=request.get_json()
+        name=data["name"]
+        type=data["type"]
+        region=data["region"]
+        # status=data["status"]
+        election_date=data["election_date"]
+        date=datetime.datetime.now()
+        election1=Election.query.filter_by(name=name).first()
+        if election1:
+            return make_response({"error":["This election already exists"]},404)
+        else:
+            election=Election(name=name,type=type,status="Pending",date=date, election_date=election_date, region=region)
+            if election:
+                db.session.add(election)
+                db.session.commit()
+                return make_response(election.to_dict(),201)
+            else:
+                return make_response({"error":["Server error"]},500)
+    def get(self):
+        elections=Election.query.all()
+        return make_response([election.to_dict() for election in elections],200)
+api.add_resource(Add_get_Election,'/elections')
+
+class Election_By_Id(Resource):
+    def get(self,id):
+        election=Election.query.filter_by(id=id).first()
+        if election:
+            return make_response(election.to_dict(),200)
+        else:
+            return make_response({"error":["Election doesnt exist"]},404)
+    def delete(self,id):
+        election=Election.query.filter_by(id=id).first()
+        if election:
+            db.session.delete(election)
+            db.session.commit()
+            return make_response({"message":["Election deleted successfully"]},204)
+        return make_response({"error":["Election does not exist"]},404)
+api.add_resource(Election_By_Id,'/election/<int:id>')
+
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
 
