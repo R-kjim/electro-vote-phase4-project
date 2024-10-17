@@ -65,7 +65,11 @@ const LoginSignup = () => {
       })
       .then(data=>{
         localStorage.setItem("userId",data.user)
-        navigate(`/dashboard/user/${localStorage.getItem("userId")}`)
+        if(data.role==="Voter"){
+        navigate(`/dashboard/user/${localStorage.getItem("userId")}`)}
+        else if(data.role==="Admin"){
+          navigate(`/admin/dashboard/${localStorage.getItem("userId")}`)
+        }
         value.setLoginStatus(true)
       })
     }

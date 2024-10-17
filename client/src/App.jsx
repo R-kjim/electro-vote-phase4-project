@@ -42,7 +42,7 @@ const App = () => {
           <Route path='update-details' element={<UpdateDetails />} />
         </Route>
         <Route path='/admin' element={<Admin />}>
-          <Route path='dashboard' element={<AdminDashboard />}/>
+          <Route path='dashboard/:id' element={<AdminDashboard />}/>
         </Route>
         <Route path='/results' element={<ResultsDashboard />}/>
       </Routes>

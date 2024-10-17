@@ -51,6 +51,7 @@ const UpdateDetails = () => {
         .then(res=>{
             if(res.ok){
                 toast.success("Voter details updated succesfully")
+                // window.location.reload()
                 navigate(`/dashboard/user/${value.userId}`)
                 setIsRegisteredVoter(true)
                 return res.json()
