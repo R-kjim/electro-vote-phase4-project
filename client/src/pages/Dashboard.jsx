@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { UserIcon, CheckCircleIcon, ExclamationCircleIcon, CalendarIcon, ChartBarIcon, DocumentIcon } from '@heroicons/react/outline';
 import { AppContext } from '../../AppContext';
@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const userData=value.userData
   const isRegisteredVoter=value.isRegisteredVoter
-
+  let upcomingElections=value.elections.filter((election)=>{return election.status==="Pending"})
   return (
     <div className="container mx-auto p-6">
       {/* Welcome Section */}
@@ -65,20 +65,26 @@ const Dashboard = () => {
         <h2 className="text-2xl font-bold mb-4">Upcoming Elections</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Sample elections */}
-          <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(1)}>
+          {upcomingElections.length>0?
+            upcomingElections.map((election)=>{
+              return (
+                <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(election.id)}>
             <CalendarIcon className="h-10 w-10 text-indigo-500 mr-4" />
             <div>
-              <h3 className="text-xl font-semibold">General Elections</h3>
-              <p className="mt-2 text-gray-600">Date: 20th November 2024</p>
+              <h3 className="text-xl font-semibold">{election.name}</h3>
+              <p className="mt-2 text-gray-600">Date: {election.election_date}</p>
             </div>
           </div>
-          <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(2)}>
+              )
+            })
+          :<p>No upcoming Elections you can participate!</p>}
+          {/* <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(2)}>
             <CalendarIcon className="h-10 w-10 text-indigo-500 mr-4" />
             <div>
               <h3 className="text-xl font-semibold">Runoff Election</h3>
               <p className="mt-2 text-gray-600">Date: 5th December 2024</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
