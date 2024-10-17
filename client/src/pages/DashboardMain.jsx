@@ -6,9 +6,10 @@ const DashboardMain = () => {
     const value=useContext(AppContext)
   return (
     <div>
-        {value.loginStatus?
-      <Outlet />:null
-        }
+        {/* {value.loginStatus? */}
+      <Outlet />
+      {/* :null */}
+        {/* } */}
     </div>
   )
 }
