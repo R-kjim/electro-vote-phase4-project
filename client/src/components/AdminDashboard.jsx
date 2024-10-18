@@ -16,7 +16,7 @@ const[candidateData, setCandidateData]=useState({
   election:"",
   position:"",
   name:"",
-  region:""
+  region:region
 })
 let regions=value.regions
 // Filter name suggestions for a candidate
@@ -176,7 +176,6 @@ const handleNameSuggestionClick = (suggestion) => {
       }
     })
   }
-  console.log(candidate)
   //use effect to handle data flexibility
   useEffect(()=>{
     if(candidateData.election!==""){
@@ -189,24 +188,45 @@ const handleNameSuggestionClick = (suggestion) => {
       }
       if(item1.type!=="General"){setPositions([item1.type])}
 
-    }
+    }    if(candidate.user){
+
     if(candidateData.position==="President"){setRegion("Countrywide")}
-    if(candidate.user){
-    if(candidateData.position=="Governor"){setRegion(candidate.county.name)}}else{setRegion("---")}
+    else if(candidateData.position==="Governor"){setRegion(candidate.county.name)}
+    else if(candidateData.position=="Senator"){setRegion(candidate.county.name)}
+    else if(candidateData.position=="MP"){setRegion(candidate.constituency.name)}
+    else if(candidateData.position==="MCA"){setRegion(candidate.ward.name)}
+  }
+    // else{setRegion("---")}
   },[candidateData])
+  
   function handleAddCandidate(event){
     const {name,value}=event.target
     setCandidateData({
       ...candidateData,
       [name]:value,
-
     })
   }
   function addCandidateFn(event){
     event.preventDefault()
-    candidateData.name=candidateName
-
-    console.log(candidateData)
+    candidateData.name=candidate.national_id
+    candidateData.region=region
+    fetch("http://127.0.0.1:5555/candidates",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(candidateData)
+    })
+    .then(res=>{
+      if(res.ok){toast.success("Candidate added successfully")
+        return(res.json())
+      }else{
+        return res.json().then(errorData=>{
+          toast.error(errorData.error[0])
+        })
+      }
+    })
+    event.target.reset()
   }
   return (
     <>{value.userData?
