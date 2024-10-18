@@ -62,7 +62,7 @@ class Candidate(db.Model, SerializerMixin):
     position = db.Column(db.String)
     voter_id=db.Column(db.Integer,db.ForeignKey('voters.id'))
     election_id=db.Column(db.Integer,db.ForeignKey("elections.id"))
-
+    region=db.Column(db.String)
     # Relationships 
     voter= db.relationship('Voter', back_populates='candidate')
     election=db.relationship("Election", back_populates="candidates")
