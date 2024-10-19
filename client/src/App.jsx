@@ -13,7 +13,7 @@ import UpdateDetails from './pages/UpdateDetails';
 import DashboardMain from './pages/DashboardMain';
 import Admin from './pages/Admin';
 import AdminDashboard from './components/AdminDashboard';
-import ResultsDashboard from './components/ResultsDashboard';
+import ResultsDashboard from './components/ResultsDashboard'; // Import ResultsDashboard
 
 const App = () => {
   const [isAdminAvailable, setIsAdminAvailable] = useState(false);
@@ -44,10 +44,11 @@ const App = () => {
         <Route path='/admin' element={<Admin />}>
           <Route path='dashboard/:id' element={<AdminDashboard />}/>
         </Route>
-        <Route path='/results' element={<ResultsDashboard />}/>
+        <Route path='/results' element={<ResultsDashboard />} /> {/* New route  */}
       </Routes>
     </div>
   );
 };
 
 export default App;
+
