@@ -4,12 +4,17 @@ import { toast } from 'react-toastify';
 import { AppContext } from '../../AppContext';
 
 const AdminDashboard = () => {
-  const value=useContext(AppContext)
-  const allCandidateNames = value.voters
+const value=useContext(AppContext)
+const allCandidateNames = value.voters
 
-  const [selectedElection,setSelectedElection]=useState([])
-  const [candidate,setCandidate]=useState({})
-  const[region,setRegion]=useState("")
+//State variables for section visibility
+const [showVoters, setShowVoters] = useState(false);
+const [showOngoing, setShowOngoing] = useState(false);
+const [showUpcoming, setShowUpcoming] = useState(false);
+
+const [selectedElection,setSelectedElection]=useState([])
+const [candidate,setCandidate]=useState({})
+const[region,setRegion]=useState("")
 const [candidateName, setCandidateName] = useState('');
 const [candidateSuggestions, setCandidateSuggestions] = useState([]);
 const[candidateData, setCandidateData]=useState({
@@ -247,21 +252,55 @@ const handleNameSuggestionClick = (suggestion) => {
         <section className="mt-6">
           <h1 className="text-4xl font-bold mb-6">Admin Dashboard</h1>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="bg-blue-100 p-4 rounded-lg shadow-md">
+            <div className="bg-blue-100 p-4 rounded-lg shadow-md cursor-pointer"onClick={() => setShowVoters(!showVoters)}>
               <FaUserCheck className="text-3xl mb-2" />
               <h2 className="text-2xl font-bold">{value.voters.length}</h2>
               <p>Registered Voters</p>
             </div>
-            <div className="bg-green-100 p-4 rounded-lg shadow-md">
+            {showVoters && (
+                  <div>
+                    {/* Display registered voters */}
+                    <h3 className="text-lg font-semibold">Registered Voters:</h3>
+                    <ul>
+                      {value.voters.map((voter) => (
+                        <li key={voter.id}>{voter.user.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+            <div className="bg-green-100 p-4 rounded-lg shadow-md cursor-pointer" onClick={() => setShowOngoing(!showOngoing)}>
               <FaPoll className="text-3xl mb-2" />
               <h2 className="text-2xl font-bold">{filteredOngoing.length}</h2>
               <p>Ongoing Elections</p>
             </div>
-            <div className="bg-yellow-100 p-4 rounded-lg shadow-md">
+            {showOngoing && (
+                  <div>
+                    {/* Display ongoing elections */}
+                    <h3 className="text-lg font-semibold">Ongoing Elections:</h3>
+                    <ul>
+                      {filteredOngoing.map((election) => (
+                        <li key={election.id}>{election.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+            <div className="bg-yellow-100 p-4 rounded-lg shadow-md cursor-pointer" onClick={() => setShowUpcoming(!showUpcoming)}>
               <FaUsers className="text-3xl mb-2" />
               <h2 className="text-2xl font-bold">{filterPending.length}</h2>
               <p>Upcoming Elections</p>
             </div>
+            {showUpcoming && (
+                  <div>
+                    {/* Display upcoming elections */}
+                    <h3 className="text-lg font-semibold">Upcoming Elections:</h3>
+                    <ul>
+                      {filterPending.map((election) => (
+                        <li key={election.id}>{election.name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
           </div>
           <h3 className="text-xl font-semibold mb-4">Recent Activities</h3>
           {/* <ul className="list-disc ml-6">
