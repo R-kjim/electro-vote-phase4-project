@@ -1,4 +1,4 @@
-from models import db,User,Constituency,County,Ward,Voter,Candidate,Election
+from models import db,User,Constituency,County,Ward,Voter,Candidate,Election,Vote
 from flask_migrate import Migrate
 from flask import Flask, request, make_response
 from flask_restful import Api, Resource
@@ -27,7 +27,7 @@ api=Api(app)
 bcrypt = Bcrypt(app)
 jwt=JWTManager(app)
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"])
 
 class Signup(Resource):
     def post(self):
@@ -245,16 +245,29 @@ class Voter_Details(Resource):
             db.session.commit()
             return make_response(new_voter.to_dict(),201)
         return make_response({"error":["Invalid data entry"]})
-    @jwt_required()
+    # @jwt_required()
     def patch(self,id):
         data=request.get_json()
         voter=Voter.query.filter_by(id=id).first()
         if voter:
-            national_id=data["national_id"]
-            if len(str(national_id))==8 and isinstance(str,national_id):
+            national_id=data["nationalId"]
+            if len(str(national_id))==8:
                 for attr in data:
-                    setattr(voter,attr,data[attr])
-            db.session.add(voter)
+                    if attr=="constituency":
+                        constituency=Constituency.query.filter_by(name=data["constituency"]).first()
+                        if constituency:
+                            setattr(voter,'constituency_id',constituency.id)
+                    if attr=="county":
+                        county=County.query.filter_by(name=data["county"]).first()
+                        if county:
+                            setattr(voter,'county_id',county.id)
+                    if attr=="ward":
+                        ward=Ward.query.filter_by(name=data["ward"]).first()
+                        if ward:
+                            setattr(voter,'ward_id',ward.id)
+                    if attr=='national_id':
+                        setattr(voter,attr,data[attr])
+            # db.session.add(voter)
             db.session.commit()
             return make_response(voter.to_dict(),200)
     # @jwt_required()
@@ -274,29 +287,70 @@ api.add_resource(Get_Voters, '/voters')
 
 class Add_Get_Candidate(Resource):
     # @jwt_required
+    # def post(self):
+    #     data=request.get_json()
+    #     positions=['President',"Governor","Senator","MP","MCA"]
+    #     position=data["position"]
+    #     voter_id=data["name"]
+    #     election1=data["election"]
+    #     region=data["region"]
+    #     election=Election.query.filter_by(name=election1).first()
+    #     voter=Voter.query.filter_by(national_id=voter_id).first()
+    #     if voter:
+    #         if position in positions:
+    #             candidate=Candidate(position=position,voter_id=voter.id,election_id=election.id, region=region)
+    #             if candidate:
+    #                 db.session.add(candidate)
+    #                 db.session.commit()
+    #                 return make_response(candidate.to_dict(),201)
+    #             else:
+    #                 return make_response({"error":["An error occured. Kindly try again later"]},500)
+    #         else:
+    #             return make_response({"error":[f"Select a position from {positions}"]})
+    #     else:
+    #         return make_response({"error":["Not a registered voter"]},404)
     def post(self):
-        data=request.get_json()
-        positions=['President',"Governor","Senator","MP","MCA"]
-        position=data["position"]
-        voter_id=data["name"]
-        election1=data["election"]
-        region=data["region"]
-        election=Election.query.filter_by(name=election1).first()
-        voter=Voter.query.filter_by(national_id=voter_id).first()
+        data = request.get_json()
+        positions = ['President', "Governor", "Senator", "MP", "MCA"]
+        position = data["position"]
+        voter_id = data["name"]
+        election1 = data["election"]
+        region = data["region"]
+        
+        # Get the new fields
+        party = data.get("party")
+        description = data.get("description")
+        image_url = data.get("image_url")
+        
+        election = Election.query.filter_by(name=election1).first()
+        voter = Voter.query.filter_by(national_id=voter_id).first()
+        candidate1=Candidate.query.filter_by(voter_id=voter.id).first()
+        
+        if candidate1 and candidate1.election_id==election.id:
+            return make_response({"error":["This candidate is already participating in this election"]},400)
         if voter:
             if position in positions:
-                candidate=Candidate(position=position,voter_id=voter.id,election_id=election.id, region=region)
+                # Create the candidate with the new fields
+                candidate = Candidate(
+                    position=position,
+                    voter_id=voter.id,
+                    election_id=election.id,
+                    region=region,
+                    party=party,
+                    description=description,
+                    image_url=image_url
+                )
                 if candidate:
                     db.session.add(candidate)
                     db.session.commit()
-                    return make_response(candidate.to_dict(),201)
+                    return make_response(candidate.to_dict(), 201)
                 else:
-                    return make_response({"error":["An error occured. Kindly try again later"]},500)
+                    return make_response({"error": ["An error occurred. Kindly try again later"]}, 500)
             else:
-                return make_response({"error":[f"Select a position from {positions}"]})
+                return make_response({"error": [f"Select a position from {positions}"]})
         else:
-            return make_response({"error":["Not a registered voter"]},404)
-    
+            return make_response({"error": ["Not a registered voter"]}, 404)
+
     def get(self):
         candidates=Candidate.query.all()
         return make_response([candidate.to_dict() for candidate in candidates],200)
@@ -386,7 +440,90 @@ class Election_By_Id(Resource):
         return make_response({"error":["Election does not exist"]},404)
 api.add_resource(Election_By_Id,'/election/<int:id>')
 
+# class VoteResource(Resource):
+#     def post(self):
+#         # Get the vote data from the request
+#         data = request.get_json()
+        
+#         # Extract candidate ID and election ID from the data
+#         candidate_id = data.get("candidate_id")
+#         election_id = data.get("election_id")
 
+#         # Check if the candidate exists
+#         candidate = Candidate.query.get(candidate_id)
+#         if not candidate:
+#             return make_response({"error": ["Candidate not found"]}, 404)
+
+#         # Check if the election exists
+#         election = Election.query.get(election_id)
+#         if not election:
+#             return make_response({"error": ["Election not found"]}, 404)
+
+#         # Create a new vote
+#         new_vote = Vote(candidate_id=candidate_id, election_id=election_id)
+
+#         # Add the vote to the session and commit
+#         db.session.add(new_vote)
+#         db.session.commit()
+
+#         # Return a success message
+#         return make_response({"message": ["Vote cast successfully"]}, 201)
+# api.add_resource(VoteResource,'/votes')
+
+class VoteResource(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Extract the necessary fields
+        candidate_name = data.get('candidate')
+        election_name = data.get('election')
+        voter_national_id = data.get('voter')
+
+        # Check if all required fields are provided
+        if not candidate_name or not election_name or not voter_national_id:
+            return make_response({'message': ['Missing required fields']}, 400)
+
+        # Ensure the election exists
+        election = Election.query.filter_by(name=election_name).first()
+        if not election:
+            return make_response({'message': ['Election not found']}, 404)
+        # Ensure the candidate exists
+        candidate = Candidate.query.filter_by(id=candidate_name, election_id=election.id).first()
+        if not candidate:
+            return make_response({'message': ['Candidate not found in this election']}, 404)
+        # Ensure the voter exists
+        voter = Voter.query.filter_by(national_id=voter_national_id).first()
+        if not voter:
+            return make_response({'message': ['Voter not found']}, 404)
+
+        
+
+        # Check if the voter has already voted in this election
+        existing_vote = Vote.query.filter_by(voter_id=voter.id, election_id=election.id).all()
+        if len(existing_vote)>5:
+            return make_response({'message': ['Voter has already voted in this election']}, 400)
+        # try:
+            # Create a new vote record
+        vote = Vote(
+            candidate_id=candidate.id,
+            election_id=election.id,
+            voter_id=voter.id
+        )
+        if vote:
+        # Add the new vote to the session and commit
+            db.session.add(vote)
+            db.session.commit()
+
+            return  make_response(vote.to_dict(), 201)
+        return make_response({'message': ['An error occurred while processing the vote']}, 500)
+        # except:
+        #     db.session.rollback()
+        #     return make_response({'message': ['An error occurred while processing the vote']}, 500)
+    
+    def get(self):
+        votes=Vote.query.all()
+        return make_response([vote.to_dict() for vote in votes],200)
+api.add_resource(VoteResource,'/vote')
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
 

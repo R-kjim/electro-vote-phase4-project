@@ -14,6 +14,13 @@ import DashboardMain from './pages/DashboardMain';
 import Admin from './pages/Admin';
 import AdminDashboard from './components/AdminDashboard';
 import ResultsDashboard from './components/ResultsDashboard';
+import ManageRegions from './components/Admindashboard/ManageRegions';
+import RegisterCandidate from './components/Admindashboard/RegisterCandidate';
+import CreateElection from './components/Admindashboard/CreateElection';
+import Dashboard1 from './components/Admindashboard/Dashboard1';
+import ErrorPage from './pages/Error';
+import LoadingPage from './pages/LoadingPage';
+
 
 const App = () => {
   const [isAdminAvailable, setIsAdminAvailable] = useState(false);
@@ -26,6 +33,15 @@ const App = () => {
   }, []);
 
   return (
+    <>
+    {
+    // !localStorage.getItem("userId")?
+    // <><Navbar />
+    // <Homepage /></>:
+
+    // // <ErrorPage/>:
+    // localStorage.getItem("userId")!==" "?
+    // <ErrorPage />:
     <div>
       <ToastContainer />
       <Navbar />
@@ -42,11 +58,21 @@ const App = () => {
           <Route path='update-details' element={<UpdateDetails />} />
         </Route>
         <Route path='/admin' element={<Admin />}>
-          <Route path='dashboard/:id' element={<AdminDashboard />}/>
+          <Route path='dashboard/:id' element={<AdminDashboard />}>
+            <Route path='' element={<Dashboard1 />}/>
+            <Route path='manage-regions' element={<ManageRegions />}/>
+            <Route path='register-candidate' element={<RegisterCandidate />}/>
+            <Route path='create-election' element={<CreateElection />}/>
+          </Route>
         </Route>
         <Route path='/results' element={<ResultsDashboard />}/>
       </Routes>
     </div>
+    // :
+    // <Homepage />
+    }
+    </>
+
   );
 };
 
