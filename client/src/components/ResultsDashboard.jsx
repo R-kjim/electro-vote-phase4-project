@@ -1,52 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  CategoryScale, // <-- Import the category scale
-  LinearScale,  // <-- Import the linear scale for Y axis
-  BarElement,   // <-- Import BarElement to render bars
+  CategoryScale,
+  LinearScale,
+  BarElement,
   Title,
   Tooltip,
   Legend,
 } from 'chart.js';
 
-// Register the components with Chart.js
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// Mock data for candidates and votes by county
-const candidateData = {
-  Nairobi: {
-    President: [
-      { name: 'Candidate A', votes: 15000 },
-      { name: 'Candidate B', votes: 12000 },
-    ],
-    'Members of the National Assembly': [
-      { name: 'Candidate C', votes: 8000 },
-      { name: 'Candidate D', votes: 9000 },
-    ],
-    Governor: [
-      { name: 'Candidate E', votes: 13000 },
-      { name: 'Candidate F', votes: 11000 },
-    ],
-  },
-  Mombasa: {
-    President: [
-      { name: 'Candidate G', votes: 11000 },
-      { name: 'Candidate H', votes: 9500 },
-    ],
-    'Members of the National Assembly': [
-      { name: 'Candidate I', votes: 7000 },
-      { name: 'Candidate J', votes: 8500 },
-    ],
-    Governor: [
-      { name: 'Candidate K', votes: 14000 },
-      { name: 'Candidate L', votes: 13000 },
-    ],
-  },
-  // Add other counties as needed...
-};
-
-// Define counties and positions
 const counties = [
   'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret',
   // Add all 47 counties...
@@ -59,12 +24,31 @@ const positions = [
   'Governor',
   'Women Representative',
   'County Assembly Member',
-  // Add any additional positions you want to include...
+  // Add additional positions...
 ];
 
 const ResultsDashboard = () => {
   const [selectedCounty, setSelectedCounty] = useState(counties[0]);
   const [selectedCategory, setSelectedCategory] = useState(positions[0]);
+  const [candidateData, setCandidateData] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  // Fetch the data from the API
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5555/votes');
+        const data = await response.json();
+        setCandidateData(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleCountyChange = (event) => {
     setSelectedCounty(event.target.value);
@@ -75,6 +59,13 @@ const ResultsDashboard = () => {
   };
 
   const generateChartData = (county, category) => {
+    if (!candidateData[county] || !candidateData[county][category]) {
+      return {
+        labels: [],
+        datasets: [],
+      };
+    }
+
     const labels = candidateData[county][category].map((candidate) => candidate.name);
     const data = candidateData[county][category].map((candidate) => candidate.votes);
 
@@ -91,6 +82,10 @@ const ResultsDashboard = () => {
       ],
     };
   };
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <div className="container mx-auto px-4">
@@ -141,7 +136,7 @@ const ResultsDashboard = () => {
           </tr>
         </thead>
         <tbody>
-          {[ 
+          {[
             { id: 1, electionName: 'Presidential Election', votes: 15000, winner: 'Candidate A', date: '2024-10-01' },
             { id: 2, electionName: 'Governor Election', votes: 13000, winner: 'Candidate E', date: '2024-10-01' },
           ].map((result) => (

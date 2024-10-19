@@ -276,15 +276,16 @@ class Add_Get_Candidate(Resource):
     # @jwt_required
     def post(self):
         data=request.get_json()
-        positions=['President',"Governor","Senator","Member of Parliament","MCA"]
+        positions=['President',"Governor","Senator","MP","MCA"]
         position=data["position"]
-        voter_id=data["voter_id"]
+        voter_id=data["name"]
         election1=data["election"]
+        region=data["region"]
         election=Election.query.filter_by(name=election1).first()
-        voter=Voter.query.filter_by(id=voter_id).first()
+        voter=Voter.query.filter_by(national_id=voter_id).first()
         if voter:
             if position in positions:
-                candidate=Candidate(position=position,voter_id=voter_id,election_id=election.id)
+                candidate=Candidate(position=position,voter_id=voter.id,election_id=election.id, region=region)
                 if candidate:
                     db.session.add(candidate)
                     db.session.commit()
@@ -297,7 +298,7 @@ class Add_Get_Candidate(Resource):
             return make_response({"error":["Not a registered voter"]},404)
     
     def get(self):
-        candidates=Candidate.query.filter_by(id=id).all()
+        candidates=Candidate.query.all()
         return make_response([candidate.to_dict() for candidate in candidates],200)
 api.add_resource(Add_Get_Candidate,'/candidates')
 
@@ -384,6 +385,7 @@ class Election_By_Id(Resource):
             return make_response({"message":["Election deleted successfully"]},204)
         return make_response({"error":["Election does not exist"]},404)
 api.add_resource(Election_By_Id,'/election/<int:id>')
+
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

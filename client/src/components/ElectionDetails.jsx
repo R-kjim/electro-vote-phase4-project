@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 const ElectionDetails = () => {
     const [selectedPosition, setSelectedPosition] = useState('');
     const [election,setElection]=useState({})
+    const [selectedElection,setSelectedElection]=useState("")
     const params=useParams()
     let params1=params.electionId
 
@@ -11,7 +12,8 @@ const ElectionDetails = () => {
     useEffect(()=>{
         fetch(`http://127.0.0.1:5555/election/${params1}`)
         .then(res=>res.json())
-        .then(data=>setElection(data))
+        .then(data=>{setElection(data)
+        })
     },[])
     console.log(election)
     const positions = [
@@ -108,7 +110,7 @@ const ElectionDetails = () => {
             </header>
 
             {/* Election Selection */}
-            <div className="flex justify-center space-x-4 mb-6">
+            {/* <div className="flex justify-center space-x-4 mb-6">
                 {elections.map((election, index) => (
                     <button
                         key={index}
@@ -118,24 +120,24 @@ const ElectionDetails = () => {
                         {election.name}
                     </button>
                 ))}
-            </div>
+            </div> */}
 
             {/* Runoff Description */}
-            {selectedElection === "Runoff Election" && (
+            {/* {selectedElection === "Runoff Election" && (
                 <div className="text-center mb-6">
                     <p className="text-lg font-semibold text-gray-700">{runoffDescription}</p>
                 </div>
-            )}
+            )} */}
 
             {/* Show NavBar only if General Election is selected */}
-            {selectedElection === 'General Election' && <NavBar />}
+            {election.type === 'General' && <NavBar />}
 
             {/* Notification Section */}
-            {notification && (
+            {/* {notification && (
                 <div className="mb-4 p-4 bg-green-200 text-green-800 rounded">
                     {notification}
                 </div>
-            )}
+            )} */}
 
             <main className="w-full">
                 {selectedPosition && positions
@@ -143,7 +145,7 @@ const ElectionDetails = () => {
                     .map((position, index) => (
                         <section key={index} className="mb-8">
                             <h2 className="text-4xl font-bold text-gray-700 mb-4">{position.name}</h2>
-                            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            {/* <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {selectedElection === 'Runoff Election'
                                     ? position.candidates.slice(0, 2).map((candidate, idx) => (
                                         <div key={idx} className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out transform hover:scale-105">
@@ -185,7 +187,7 @@ const ElectionDetails = () => {
                                             </button>
                                         </div>
                                     ))}
-                            </div>
+                            </div> */}
                         </section>
                     ))}
             </main>
