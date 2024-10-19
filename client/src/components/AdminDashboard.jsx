@@ -8,12 +8,17 @@ import { Outlet } from 'react-router-dom';
 import LoadingPage from '../pages/LoadingPage';
 
 const AdminDashboard = () => {
-  const value=useContext(AppContext)
-  const allCandidateNames = value.voters
+const value=useContext(AppContext)
+const allCandidateNames = value.voters
 
-  const [selectedElection,setSelectedElection]=useState([])
-  const [candidate,setCandidate]=useState({})
-  const[region,setRegion]=useState("")
+//State variables for section visibility
+const [showVoters, setShowVoters] = useState(false);
+const [showOngoing, setShowOngoing] = useState(false);
+const [showUpcoming, setShowUpcoming] = useState(false);
+
+const [selectedElection,setSelectedElection]=useState([])
+const [candidate,setCandidate]=useState({})
+const[region,setRegion]=useState("")
 const [candidateName, setCandidateName] = useState('');
 const [candidateSuggestions, setCandidateSuggestions] = useState([]);
 const[candidateData, setCandidateData]=useState({

@@ -65,7 +65,7 @@ const App = () => {
             <Route path='create-election' element={<CreateElection />}/>
           </Route>
         </Route>
-        <Route path='/results' element={<ResultsDashboard />}/>
+        <Route path='/results' element={<ResultsDashboard />} /> {/* New route  */}
       </Routes>
     </div>
     // :
@@ -77,3 +77,4 @@ const App = () => {
 };
 
 export default App;
+
