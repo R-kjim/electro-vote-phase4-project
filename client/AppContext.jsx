@@ -6,7 +6,7 @@ export const AppContext=createContext()
 
 const AppContextProvider = (props) => {
     const [isRegistering, setIsRegistering] = useState(false);
-    const [loginStatus,setLoginStatus]=useState(false)
+    const [updateStatus,setUpdateStatus]=useState(false)
     const [userData,setUserData]=useState([])
     const [param,setParam]=useState(null)
     const [isRegisteredVoter, setIsRegisteredVoter] = useState(false)
@@ -20,6 +20,7 @@ const AppContextProvider = (props) => {
 
     //fetch functionalities
     useEffect(()=>{
+       
         //fetch user data
         fetch(`http://127.0.0.1:5555/user/${userId}`)
         .then(res=>res.json())
@@ -57,7 +58,7 @@ const AppContextProvider = (props) => {
     const value={
         isRegistering, setIsRegistering,userData,setUserData,param,setParam,
         isRegisteredVoter, setIsRegisteredVoter,regions,setRegions,userId,
-        loginStatus,setLoginStatus,elections,voters,filteredConstituencies,
+        updateStatus,setUpdateStatus,elections,voters,filteredConstituencies,
         addWardData,setAddWard
 
     }

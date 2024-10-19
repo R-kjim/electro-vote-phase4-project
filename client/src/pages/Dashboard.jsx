@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { UserIcon, CheckCircleIcon, ExclamationCircleIcon, CalendarIcon, ChartBarIcon, DocumentIcon } from '@heroicons/react/outline';
 import { AppContext } from '../../AppContext';
 import { Link, Outlet, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -66,9 +67,10 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Sample elections */}
           {upcomingElections.length>0?
-            upcomingElections.map((election)=>{
+            upcomingElections.map((election,index)=>{
               return (
-                <div className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => handleElectionClick(election.id)}>
+                <div key={index} className="bg-gray-100 p-6 rounded-lg shadow-md flex items-center" onClick={() => 
+                  value.isRegisteredVoter?handleElectionClick(election.id):toast.error("Update voter details to participate in an election")}>
             <CalendarIcon className="h-10 w-10 text-indigo-500 mr-4" />
             <div>
               <h3 className="text-xl font-semibold">{election.name}</h3>
@@ -110,7 +112,10 @@ const Dashboard = () => {
                 <DocumentIcon className="h-6 w-6 mr-2" />
                 View Voting History
               </button>
-              <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={()=>{
+                value.setUpdateStatus(true)
+                navigate(`/dashboard/update-details`)
+              }}>
                 <UserIcon className="h-6 w-6 mr-2" />
                 Update Registration
               </button>

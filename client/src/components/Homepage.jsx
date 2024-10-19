@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { FaUserPlus, FaVoteYea, FaCheckCircle, FaPoll } from 'react-icons/fa';
 import kenya from '../assets/kenya.jpeg'
 import { Link } from 'react-router-dom';
@@ -7,7 +7,9 @@ import { AppContext } from '../../AppContext';
 const Homepage = () => {
   const value=useContext(AppContext)
   const setIsRegistering=value.setIsRegistering
-  console.log(value.userId)
+  useEffect(()=>{
+   
+  },[value.userId])
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
