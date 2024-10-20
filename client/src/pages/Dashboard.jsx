@@ -1,4 +1,4 @@
-import React, { useContext, useEffect} from 'react';
+import React, { useContext, useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { UserIcon, CheckCircleIcon, ExclamationCircleIcon, CalendarIcon, ChartBarIcon, DocumentIcon } from '@heroicons/react/outline';
 import { AppContext } from '../../AppContext';
@@ -12,9 +12,34 @@ const Dashboard = () => {
   params=params.id
   useEffect(()=>{
        value.setParam(params)
+     
+      // init()
     },[])
+    // function init(){
+    //   if(value.userData.voter){
+    //     let votes=value.userData.voter[0].vote
+    //     const election_count=votes.reduce((acc,current)=>{
+    //         const id = current.election_id;
+    //         acc[id] = (acc[id] || 0) + 1; // Increment the count for each election_id
+    //         // return {[id]:acc[id]};
+    //         return acc
+    //       },{})
+    //   setMyVotes(election_count)
+    //   }
+    // }
+    // init()
   const handleElectionClick = (electionId) => {
+    let votes=value.userData.voter[0].vote
+        const election_count=votes.reduce((acc,current)=>{
+            const id = current.election_id;
+            acc[id] = (acc[id] || 0) + 1; // Increment the count for each election_id
+            // return {[id]:acc[id]};
+            return acc
+          },{})
+      if(election_count[electionId]){toast.error("You already participated in this election")}
+      else{
     navigate(`/election-details/${electionId}`); // Navigate to ElectionDetails with the electionId
+  }
   };
 
   const userData=value.userData
