@@ -5,7 +5,6 @@ import { AppContext } from '../../AppContext';
 
 const ResultsDashboard = () => {
   const [selectedElection, setSelectedElection] = useState("");
-  const [selectedElection, setSelectedElection] = useState("");
   const [selectedCounty, setSelectedCounty] = useState('');
   const [selectedConstituency, setSelectedConstituency] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
