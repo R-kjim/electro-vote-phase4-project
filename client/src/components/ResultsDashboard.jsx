@@ -1,154 +1,114 @@
-import React, { useState, useEffect } from 'react';
-import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-const counties = [
-  'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret',
-  // Add all 47 counties...
-];
-
-const positions = [
-  'President',
-  'Members of the National Assembly',
-  'Senator',
-  'Governor',
-  'Women Representative',
-  'County Assembly Member',
-  // Add additional positions...
-];
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContext } from '../../AppContext';
 
 const ResultsDashboard = () => {
-  const [selectedCounty, setSelectedCounty] = useState(counties[0]);
-  const [selectedCategory, setSelectedCategory] = useState(positions[0]);
-  const [candidateData, setCandidateData] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [selectedElection, setSelectedElection] = useState("");
+  const [selectedCounty, setSelectedCounty] = useState('');
+  const [selectedConstituency, setSelectedConstituency] = useState('');
+  const [selectedWard, setSelectedWard] = useState('');
+  const [filteredCandidates,setFilteredCandidates]=useState(null)
+  const [selectedPosition,setSelectedPosition]=useState("President")
+  const [totalVotes,setTotalVotes]=useState(0)
+  const [leader,setLeader]=useState()
+  const positions = ["President",'Governor', 'Senator', 'MP', 'MCA'];
 
-  // Fetch the data from the API
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:5555/votes');
-        const data = await response.json();
-        setCandidateData(data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        setLoading(false);
+  const value=useContext(AppContext)
+  const elections=value.elections
+   //filter elections data to show only selected election and closed elections
+   const closedElections=elections.filter((election)=>{return election.status==="Closed"})
+   const filteredElection=elections.filter((election)=>{
+    
+    return election.name===selectedElection
+  })
+
+  useEffect(()=>{
+    if(filteredElection[0] && filteredElection[0].candidates.length>0){
+      if(filteredElection[0].type!=="General"){setSelectedPosition(filteredElection[0].type)}
+      const filteredCandidates=filteredElection[0].candidates.filter((candidate)=>{return (candidate.position===selectedPosition)})
+      setFilteredCandidates(filteredCandidates)
+      let x=0
+      let lead=0
+      let leadId=0
+      for(let item of filteredCandidates){
+        console.log(item)
+        if(item.votes.length>lead){leadId=item.id}
+        x+=item.votes.length
       }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleCountyChange = (event) => {
-    setSelectedCounty(event.target.value);
-  };
-
-  const handleCategoryChange = (event) => {
-    setSelectedCategory(event.target.value);
-  };
-
-  const generateChartData = (county, category) => {
-    if (!candidateData[county] || !candidateData[county][category]) {
-      return {
-        labels: [],
-        datasets: [],
-      };
+      setTotalVotes(x)
+      setLeader(leadId)
     }
-
-    const labels = candidateData[county][category].map((candidate) => candidate.name);
-    const data = candidateData[county][category].map((candidate) => candidate.votes);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: `Votes for ${category} in ${county}`,
-          data,
-          backgroundColor: 'rgba(75,192,192,0.4)',
-          borderColor: 'rgba(75,192,192,1)',
-          borderWidth: 1,
-        },
-      ],
-    };
-  };
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
+  },[selectedElection,selectedPosition])
   return (
-    <div className="container mx-auto px-4">
-      <h1 className="text-3xl font-bold mb-6">Election Results Dashboard</h1>
-
-      <div className="filter-section mb-6">
-        <label htmlFor="county-select" className="mr-2">Select County:</label>
-        <select
-          id="county-select"
-          value={selectedCounty}
-          onChange={handleCountyChange}
-          className="border rounded-md p-2"
-        >
-          {counties.map((county) => (
-            <option key={county} value={county}>
-              {county}
-            </option>
-          ))}
+    <div className="max-w-7xl mx-auto p-6">
+      {/* Election Dropdown */}
+      <div className="mb-4">
+        <select value={selectedElection} onChange={(e) => setSelectedElection(e.target.value)} className="p-2 border rounded-md w-full">
+          <option value="">Select Election</option>
+          {closedElections.map((election,index)=>{return (<option key={index} value={election.name}>{election.name}</option>)})}
         </select>
+        <div className="flex space-x-3 mt-2">
+                {positions.map((position,index) => (
+                    <button
+                        key={index}
+                        onClick={() => setSelectedPosition(position)}
+                        className="flex-grow px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        >
+                        {position}
+                    </button>
+                ))}
+        </div>
+      </div>
 
-        <label htmlFor="category-select" className="ml-4 mr-2">Select Position:</label>
-        <select
-          id="category-select"
-          value={selectedCategory}
-          onChange={handleCategoryChange}
-          className="border rounded-md p-2"
-        >
-          {positions.map((position) => (
-            <option key={position} value={position}>
-              {position}
-            </option>
-          ))}
+        
+      {/* Filter Section */}
+      <div className="flex justify-between mb-6 space-x-4">
+        <select value={selectedCounty} onChange={(e) => setSelectedCounty(e.target.value)} className="p-2 border rounded-md">
+          <option value="">County: Select</option>
+        </select>
+        <select value={selectedConstituency} onChange={(e) => setSelectedConstituency(e.target.value)} className="p-2 border rounded-md">
+          <option value="">Constituency: Select</option>
+        </select>
+        <select value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} className="p-2 border rounded-md">
+          <option value="">Ward: Select</option>
         </select>
       </div>
 
-      <div className="category-section mb-6">
-        <h2 className="text-xl font-semibold">{selectedCategory} Results in {selectedCounty}</h2>
-        <Bar data={generateChartData(selectedCounty, selectedCategory)} />
-      </div>
-
-      <table className="min-w-full bg-white border border-gray-300 mb-6">
-        <thead>
-          <tr>
-            <th className="py-2 px-4 border-b">Election Name</th>
-            <th className="py-2 px-4 border-b">Votes</th>
-            <th className="py-2 px-4 border-b">Winner</th>
-            <th className="py-2 px-4 border-b">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {[
-            { id: 1, electionName: 'Presidential Election', votes: 15000, winner: 'Candidate A', date: '2024-10-01' },
-            { id: 2, electionName: 'Governor Election', votes: 13000, winner: 'Candidate E', date: '2024-10-01' },
-          ].map((result) => (
-            <tr key={result.id}>
-              <td className="py-2 px-4 border-b">{result.electionName}</td>
-              <td className="py-2 px-4 border-b">{result.votes}</td>
-              <td className="py-2 px-4 border-b">{result.winner}</td>
-              <td className="py-2 px-4 border-b">{new Date(result.date).toLocaleDateString()}</td>
+      {/* Candidates Results Table */}
+      <div className="overflow-x-auto bg-white shadow-md rounded-md">
+        {filteredCandidates && <table className="min-w-full text-left">
+          <thead>
+            <tr className="border-b">
+              <th className="p-4">Name</th>
+              <th className="p-4">Party</th>
+              <th className="p-4">% of Votes</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredCandidates.map((candidate) => (
+              <tr key={candidate.id} className="border-b">
+                <td className="p-4">
+                <img 
+                    src={`${candidate.image_url}`} 
+                    alt={`${candidate.voter.user.name}`} 
+                    className="w-12 h-12 rounded-full mr-7" 
+                />
+                <span>{candidate.voter.user.name}</span>
+                </td>
+                <td className="p-4">{candidate.party}</td>
+                <td className="p-4">
+                  <div className="flex items-center">
+                    <div
+                      className={`h-4 ${candidate.id === leader ? 'bg-green-500' : 'bg-red-500'}`}
+                      style={{ width: `${(candidate.votes.length/totalVotes)*100}%` }}
+                    ></div>
+                    <span className="ml-2">{((candidate.votes.length/totalVotes)*100).toFixed(2)}%</span>
+                  </div>
+                </td>
+              </tr>
+             ))}
+           </tbody>
+        </table> }
+      </div>
     </div>
   );
 };

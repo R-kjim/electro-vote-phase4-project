@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 
 const CreateElection = () => {
   const value=useContext(AppContext)
+  const subDiv=value.subNav
   const navigate=useNavigate()
   let regions=value.regions
   const [electionForm,setElectionForm]=useState({
@@ -13,6 +14,8 @@ const CreateElection = () => {
     region:"",
     election_date:""
   })
+  const elections=value.elections
+  const [updateStatus,setUpdateStatus]=useState("")
   //function to navigate to dashboard
   function navigates(){
     navigate(`/admin/dashboard/${value.userId}`)
@@ -25,9 +28,7 @@ const CreateElection = () => {
       ...electionForm,
       [name]:value,
     })
-    // console.log()
   }
-  console.log(electionForm)
   //function to handle create election
   function createElectionFn(event){
     event.preventDefault()
@@ -49,9 +50,88 @@ const CreateElection = () => {
       }
     })
   }
+  //function to update status of an election
+  function submitStatus(id){
+    let obj={status:updateStatus}
+    if(obj.status !==""){
+    fetch(`http://127.0.0.1:5555/election/${id}`,{
+      method:"PATCH",
+      body:JSON.stringify(obj),
+      headers:{
+        "Content-Type":"application/json"
+      }
+    })
+    .then(res=>{
+      if(res.ok){toast.success("Updated successfully")
+        return(res.json())
+      }else{
+        return res.json().then(errorData=>{
+          toast.error(errorData.error[0])
+        })
+      }
+    })
+  }else{
+      toast.error("Select a value to update an election status")
+    }
+
+  }
   return (
     <div>
-      <section className="mb-6">
+      {subDiv==="View Elections" && 
+      <section>
+        <div className="p-5">
+          <h2 className="text-2xl font-bold mb-5">Manage Elections Status</h2>
+
+          <table className="min-w-full bg-white border border-gray-200 shadow-md">
+            <thead>
+              <tr>
+                <th className="p-3 border">Election Name</th>
+                <th className="p-3 border">Date</th>
+                <th className="p-3 border">Type</th>
+                <th className="p-3 border">Current Status</th>
+                <th className="p-3 border">Change Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {elections.map((election) => (
+                <tr key={election.id}>
+                  <td className="p-3 border">{election.name}</td>
+                  <td className="p-3 border">{election.election_date}</td>
+                  <td className="p-3 border">{election.type}</td>
+                  <td className="p-3 border">
+                    <span
+                      className={`px-2 py-1 rounded ${
+                        election.status === 'Pending'
+                          ? 'bg-yellow-500 text-white'
+                          : election.status === 'Ongoing'
+                          ? 'bg-green-500 text-white'
+                          : 'bg-red-500 text-white'
+                      }`}
+                    >
+                      {election.status}
+                    </span>
+                  </td>
+                  <td className="p-3 border">
+                    <select className="px-2 py-1 border rounded" onChange={(e)=>setUpdateStatus(e.target.value)}>
+                      <option value="">Select status</option>
+                      {["Pending","Closed","Ongoing"].filter((option)=>{
+                        if(option!==election.status){return(option)}
+                      }).map((choice,index)=>{
+                        return(<option key={index} value={choice}>{choice}</option>)
+                      })}
+                     
+                    </select>
+                    <button className="ml-3 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700" onClick={()=>submitStatus(election.id)}>
+                      Save
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>}
+      {subDiv==="Create An Election" && <section className="mb-6">
            <h2 className="text-2xl font-bold mb-4">Create an Election</h2>
            <form onSubmit={createElectionFn}>
              <input type="text" placeholder="Enter election name" className="border p-2 rounded-lg w-full mb-2" 
@@ -99,7 +179,7 @@ const CreateElection = () => {
              required/>
              <button className="bg-teal-600 text-white py-2 px-4 rounded-lg hover:bg-teal-700">Create Election</button>
            </form>
-         </section>
+      </section>}
     </div>
   )
 }

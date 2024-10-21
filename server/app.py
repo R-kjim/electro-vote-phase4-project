@@ -286,29 +286,6 @@ class Get_Voters(Resource):
 api.add_resource(Get_Voters, '/voters')
 
 class Add_Get_Candidate(Resource):
-    # @jwt_required
-    # def post(self):
-    #     data=request.get_json()
-    #     positions=['President',"Governor","Senator","MP","MCA"]
-    #     position=data["position"]
-    #     voter_id=data["name"]
-    #     election1=data["election"]
-    #     region=data["region"]
-    #     election=Election.query.filter_by(name=election1).first()
-    #     voter=Voter.query.filter_by(national_id=voter_id).first()
-    #     if voter:
-    #         if position in positions:
-    #             candidate=Candidate(position=position,voter_id=voter.id,election_id=election.id, region=region)
-    #             if candidate:
-    #                 db.session.add(candidate)
-    #                 db.session.commit()
-    #                 return make_response(candidate.to_dict(),201)
-    #             else:
-    #                 return make_response({"error":["An error occured. Kindly try again later"]},500)
-    #         else:
-    #             return make_response({"error":[f"Select a position from {positions}"]})
-    #     else:
-    #         return make_response({"error":["Not a registered voter"]},404)
     def post(self):
         data = request.get_json()
         positions = ['President', "Governor", "Senator", "MP", "MCA"]
@@ -438,6 +415,17 @@ class Election_By_Id(Resource):
             db.session.commit()
             return make_response({"message":["Election deleted successfully"]},204)
         return make_response({"error":["Election does not exist"]},404)
+    def patch(self,id):
+        election=Election.query.filter_by(id=id).first()
+        if election:
+            data=request.get_json()
+            for attr in data:
+                setattr(election,attr,data[attr])
+            db.session.add(election)
+            db.session.commit()
+            return make_response(election.to_dict(),200)
+        else:
+            return make_response({"error":["Election not found"]},404)
 api.add_resource(Election_By_Id,'/election/<int:id>')
 
 # class VoteResource(Resource):

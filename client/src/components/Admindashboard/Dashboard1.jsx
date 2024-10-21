@@ -6,9 +6,9 @@ const Dashboard1 = () => {
   const value = useContext(AppContext);
 
   // Filtering elections based on status
-  const filteredOngoing = value.elections.filter((election) => election.status === "Active");
+  const filteredOngoing = value.elections.filter((election) => election.status === "Ongoing");
   const filterPending = value.elections.filter((election) => election.status === "Pending");
-
+console.log(filteredOngoing)
   // State variable to track the visible section
   const [activeSection, setActiveSection] = useState(null);
 
@@ -60,8 +60,8 @@ const Dashboard1 = () => {
             <div className="bg-blue-50 p-4 rounded-lg">
               <h3 className="text-lg font-semibold">Registered Voters:</h3>
               <ul>
-                {value.voters.map((voter) => (
-                  <li key={voter.id}>{voter.user.name}</li>
+                {value.voters.map((voter,index) => (
+                  <li key={index}>{voter.user.name}</li>
                 ))}
               </ul>
             </div>
