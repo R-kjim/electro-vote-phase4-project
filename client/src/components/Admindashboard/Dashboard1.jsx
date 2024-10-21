@@ -8,7 +8,7 @@ const Dashboard1 = () => {
   // Filtering elections based on status
   const filteredOngoing = value.elections.filter((election) => election.status === "Ongoing");
   const filterPending = value.elections.filter((election) => election.status === "Pending");
-console.log(filteredOngoing)
+
   // State variable to track the visible section
   const [activeSection, setActiveSection] = useState(null);
 
@@ -58,12 +58,31 @@ console.log(filteredOngoing)
         <div>
           {activeSection === 'voters' && (
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold">Registered Voters:</h3>
-              <ul>
-                {value.voters.map((voter,index) => (
-                  <li key={index}>{voter.user.name}</li>
-                ))}
-              </ul>
+              <h3 className="text-lg font-semibold mb-4">Registered Voters:</h3>
+              <table className="min-w-full bg-white border">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border">Name</th>
+                    <th className="py-2 px-4 border">National ID</th>
+                    <th className="py-2 px-4 border">Registration Date</th>
+                    <th className="py-2 px-4 border">County</th>
+                    <th className="py-2 px-4 border">Constituency</th>
+                    <th className="py-2 px-4 border">Ward</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {value.voters.map((voter, index) => (
+                    <tr key={index}>
+                      <td className="py-2 px-4 border">{voter.user.name}</td> 
+                      <td className="py-2 px-4 border">{voter.national_id}</td> {/*Get voter national id*/}
+                      <td className="py-2 px-4 border">{new Date(voter.registration_date).toLocaleDateString()}</td> {/*Get voter registration date*/}
+                      <td className="py-2 px-4 border">{voter.county.name}</td> {/*Get county voter belongs to*/}
+                      <td className="py-2 px-4 border">{voter.constituency.name}</td> {/*Get constituency voter belongs to*/}
+                      <td className="py-2 px-4 border">{voter.ward.name}</td> {/*Get ward voter belongs to*/}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 
