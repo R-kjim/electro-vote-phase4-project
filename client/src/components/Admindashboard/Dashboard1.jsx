@@ -74,8 +74,8 @@ const Dashboard1 = () => {
                   {value.voters.map((voter, index) => (
                     <tr key={index}>
                       <td className="py-2 px-4 border">{voter.user.name}</td> 
-                      <td className="py-2 px-4 border">{voter.national_id}</td> {/*Get voter national id*/}
-                      <td className="py-2 px-4 border">{new Date(voter.registration_date).toLocaleDateString()}</td> {/*Get voter registration date*/}
+                      <td className="py-2 px-4 border">{voter.national_id}</td> {/* Get voters national id */} 
+                      <td className="py-2 px-4 border">{new Date(voter.registration_date).toLocaleDateString()}</td> {/*Get voters registration date*/}
                       <td className="py-2 px-4 border">{voter.county.name}</td> {/*Get county voter belongs to*/}
                       <td className="py-2 px-4 border">{voter.constituency.name}</td> {/*Get constituency voter belongs to*/}
                       <td className="py-2 px-4 border">{voter.ward.name}</td> {/*Get ward voter belongs to*/}
@@ -88,18 +88,35 @@ const Dashboard1 = () => {
 
           {activeSection === 'ongoing' && (
             <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold">Ongoing Elections:</h3>
-              <ul>
-                {filteredOngoing.map((election) => (
-                  <li key={election.id}>{election.name}</li>
-                ))}
-              </ul>
+              <h3 className="text-lg font-semibold mb-4">Ongoing Elections:</h3>
+              <table className="min-w-full bg-white border">
+                <thead>
+                  <tr>
+                    <th className="py-2 px-4 border">Election Name</th>
+                    <th className="py-2 px-4 border">Type</th>
+                    <th className="py-2 px-4 border">Status</th>
+                    <th className="py-2 px-4 border">Date</th>
+                    <th className="py-2 px-4 border">Region</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredOngoing.map((election) => (
+                    <tr key={election.id}>
+                      <td className="py-2 px-4 border">{election.name}</td>   {/*Get the name of the election*/}
+                      <td className="py-2 px-4 border">{election.type}</td>   {/*Get the type of the election*/}
+                      <td className="py-2 px-4 border">{election.status}</td> {/*Get the status of the election*/}
+                      <td className="py-2 px-4 border">{new Date(election.date).toLocaleDateString()}</td> {/*Get the date of the election*/}
+                      <td className="py-2 px-4 border">{election.region}</td> {/*Get the region of the election*/}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 
           {activeSection === 'upcoming' && (
             <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold">Upcoming Elections:</h3>
+              <h3 className="text-lg font-semibold mb-4">Upcoming Elections:</h3>
               <ul>
                 {filterPending.map((election) => (
                   <li key={election.id}>{election.name}</li>
