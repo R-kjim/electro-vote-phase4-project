@@ -12,32 +12,65 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const counties = [
-  'Nairobi', 'Mombasa', 'Kisumu', 'Nakuru', 'Eldoret',
-  // Add all 47 counties...
-];
-
-const positions = [
-  'President',
-  'Members of the National Assembly',
-  'Senator',
-  'Governor',
-  'Women Representative',
-  'County Assembly Member',
-  // Add additional positions...
-];
-
 const ResultsDashboard = () => {
-  const [selectedCounty, setSelectedCounty] = useState(counties[0]);
-  const [selectedCategory, setSelectedCategory] = useState(positions[0]);
+  const [counties, setCounties] = useState([]); // Counties from API
+  const [selectedCounty, setSelectedCounty] = useState('');
+  const [positions, setPositions] = useState(["Governor"]); // Positions from API
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [candidateData, setCandidateData] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); // Error handling for positions and counties
 
-  // Fetch the data from the API
+  // Fetch counties from the API
+  useEffect(() => {
+    setLoading(true);
+    fetch('http://127.0.0.1:5555/county')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setCounties(data);
+        setSelectedCounty(data[0]?.name || ''); // Default to first county if available
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error);
+        setLoading(false);
+      });
+  }, []);
+
+  // Fetch positions from the API
+  useEffect(() => {
+    setLoading(true);
+    setPositions[{"name":"President"},{"name":"Governor"},{"name":"Senator"}]
+    setSelectedCategory("President")
+    setLoading(false)
+    // fetch('http://127.0.0.1:5555/positions')
+    //   .then((response) => {
+    //     if (!response.ok) {
+    //       throw new Error('Network response was not ok');
+    //     }
+    //     return response.json();
+    //   })
+    //   .then((data) => {
+    //     setPositions(data);
+    //     setSelectedCategory(data[0]?.name || ''); // Default to first position if available
+    //     setLoading(false);
+    //   })
+    //   .catch((error) => {
+    //     setError(error);
+    //     setLoading(false);
+    //   });
+  }, []);
+
+  // Fetch the vote data from the API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:5555/votes');
+        const response = await fetch('http://127.0.0.1:5555/vote');
         const data = await response.json();
         setCandidateData(data);
         setLoading(false);
@@ -49,7 +82,7 @@ const ResultsDashboard = () => {
 
     fetchData();
   }, []);
-
+  console.log(candidateData)
   const handleCountyChange = (event) => {
     setSelectedCounty(event.target.value);
   };
@@ -87,6 +120,10 @@ const ResultsDashboard = () => {
     return <p>Loading...</p>;
   }
 
+  if (error) {
+    return <p>Error loading data: {error.message}</p>;
+  }
+
   return (
     <div className="container mx-auto px-4">
       <h1 className="text-3xl font-bold mb-6">Election Results Dashboard</h1>
@@ -100,8 +137,8 @@ const ResultsDashboard = () => {
           className="border rounded-md p-2"
         >
           {counties.map((county) => (
-            <option key={county} value={county}>
-              {county}
+            <option key={county.id} value={county.name}>
+              {county.name}
             </option>
           ))}
         </select>
@@ -114,8 +151,8 @@ const ResultsDashboard = () => {
           className="border rounded-md p-2"
         >
           {positions.map((position) => (
-            <option key={position} value={position}>
-              {position}
+            <option key={position.id} value={position.name}>
+              {position.name}
             </option>
           ))}
         </select>
@@ -126,6 +163,7 @@ const ResultsDashboard = () => {
         <Bar data={generateChartData(selectedCounty, selectedCategory)} />
       </div>
 
+      {/* Table for election results */}
       <table className="min-w-full bg-white border border-gray-300 mb-6">
         <thead>
           <tr>

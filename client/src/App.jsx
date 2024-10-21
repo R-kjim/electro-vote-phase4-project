@@ -33,15 +33,6 @@ const App = () => {
   }, []);
 
   return (
-    <>
-    {
-    // !localStorage.getItem("userId")?
-    // <><Navbar />
-    // <Homepage /></>:
-
-    // // <ErrorPage/>:
-    // localStorage.getItem("userId")!==" "?
-    // <ErrorPage />:
     <div>
       <ToastContainer />
       <Navbar />
@@ -68,10 +59,6 @@ const App = () => {
         <Route path='/results' element={<ResultsDashboard />} /> {/* New route  */}
       </Routes>
     </div>
-    // :
-    // <Homepage />
-    }
-    </>
 
   );
 };
