@@ -15,8 +15,9 @@ const AppContextProvider = (props) => {
     const [voters,setVoters]=useState([])
     const [filteredConstituencies,setConstituencies]=useState([])
     const [addWardData,setAddWard]=useState({county:"",constituency:"",name:""})
-
+    const [subNav,setSubNav]=useState("")
     const userId=localStorage.getItem("userId")
+    const[candidates,setCandidates]=useState([])
 
     //fetch functionalities
     useEffect(()=>{
@@ -44,6 +45,11 @@ const AppContextProvider = (props) => {
         .then(res=>res.json())
         .then(data=>setVoters(data))
 
+        //fetch  candidates data
+        fetch("http://127.0.0.1:5555/candidates")
+        .then(res=>res.json())
+        .then(data=>setCandidates(data))
+
     },[userId])
     //update data used in other pages once userData is updated
     useEffect(()=>{
@@ -59,7 +65,7 @@ const AppContextProvider = (props) => {
         isRegistering, setIsRegistering,userData,setUserData,param,setParam,
         isRegisteredVoter, setIsRegisteredVoter,regions,setRegions,userId,
         updateStatus,setUpdateStatus,elections,voters,filteredConstituencies,
-        addWardData,setAddWard
+        addWardData,setAddWard,subNav,setSubNav,candidates,setCandidates
 
     }
   return (

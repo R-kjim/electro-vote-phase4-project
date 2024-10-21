@@ -75,7 +75,7 @@ class Candidate(db.Model, SerializerMixin):
     votes = db.relationship('Vote', back_populates='candidate')
     
     # Serialise rules
-    serialize_rules = ('-user.candidate', '-voter.candidate', "-election.candidates", "-votes.candidate")
+    serialize_rules = ('-user.candidate', '-voter.candidate', "-election.candidates", "-votes.candidate",'-election.votes')
 
 
 #County model
