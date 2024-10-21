@@ -18,6 +18,7 @@ const AppContextProvider = (props) => {
     const [subNav,setSubNav]=useState("")
     const userId=localStorage.getItem("userId")
     const[candidates,setCandidates]=useState([])
+    
 
     //fetch functionalities
     useEffect(()=>{

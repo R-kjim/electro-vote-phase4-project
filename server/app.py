@@ -428,35 +428,6 @@ class Election_By_Id(Resource):
             return make_response({"error":["Election not found"]},404)
 api.add_resource(Election_By_Id,'/election/<int:id>')
 
-# class VoteResource(Resource):
-#     def post(self):
-#         # Get the vote data from the request
-#         data = request.get_json()
-        
-#         # Extract candidate ID and election ID from the data
-#         candidate_id = data.get("candidate_id")
-#         election_id = data.get("election_id")
-
-#         # Check if the candidate exists
-#         candidate = Candidate.query.get(candidate_id)
-#         if not candidate:
-#             return make_response({"error": ["Candidate not found"]}, 404)
-
-#         # Check if the election exists
-#         election = Election.query.get(election_id)
-#         if not election:
-#             return make_response({"error": ["Election not found"]}, 404)
-
-#         # Create a new vote
-#         new_vote = Vote(candidate_id=candidate_id, election_id=election_id)
-
-#         # Add the vote to the session and commit
-#         db.session.add(new_vote)
-#         db.session.commit()
-
-#         # Return a success message
-#         return make_response({"message": ["Vote cast successfully"]}, 201)
-# api.add_resource(VoteResource,'/votes')
 
 class VoteResource(Resource):
     def post(self):

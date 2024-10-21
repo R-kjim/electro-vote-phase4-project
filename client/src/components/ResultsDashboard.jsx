@@ -1,7 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
+import React, { useContext, useEffect, useState } from 'react';
+import { AppContext } from '../../AppContext';
 
 const ResultsDashboard = () => {
+  const [selectedElection, setSelectedElection] = useState("");
   const [selectedElection, setSelectedElection] = useState("");
   const [selectedCounty, setSelectedCounty] = useState('');
   const [selectedConstituency, setSelectedConstituency] = useState('');
@@ -10,6 +13,7 @@ const ResultsDashboard = () => {
   const [selectedPosition,setSelectedPosition]=useState("President")
   const [totalVotes,setTotalVotes]=useState(0)
   const [leader,setLeader]=useState()
+  const [electionType,setElectionType]=useState("")
   const positions = ["President",'Governor', 'Senator', 'MP', 'MCA'];
 
   const value=useContext(AppContext)
@@ -23,6 +27,7 @@ const ResultsDashboard = () => {
 
   useEffect(()=>{
     if(filteredElection[0] && filteredElection[0].candidates.length>0){
+      setElectionType(filteredElection[0].type)
       if(filteredElection[0].type!=="General"){setSelectedPosition(filteredElection[0].type)}
       const filteredCandidates=filteredElection[0].candidates.filter((candidate)=>{return (candidate.position===selectedPosition)})
       setFilteredCandidates(filteredCandidates)
@@ -30,7 +35,6 @@ const ResultsDashboard = () => {
       let lead=0
       let leadId=0
       for(let item of filteredCandidates){
-        console.log(item)
         if(item.votes.length>lead){leadId=item.id}
         x+=item.votes.length
       }
@@ -46,7 +50,7 @@ const ResultsDashboard = () => {
           <option value="">Select Election</option>
           {closedElections.map((election,index)=>{return (<option key={index} value={election.name}>{election.name}</option>)})}
         </select>
-        <div className="flex space-x-3 mt-2">
+        {electionType==="General" && <div className="flex space-x-3 mt-2">
                 {positions.map((position,index) => (
                     <button
                         key={index}
@@ -56,12 +60,12 @@ const ResultsDashboard = () => {
                         {position}
                     </button>
                 ))}
-        </div>
+        </div>}
       </div>
 
         
       {/* Filter Section */}
-      <div className="flex justify-between mb-6 space-x-4">
+      {/* <div className="flex justify-between mb-6 space-x-4">
         <select value={selectedCounty} onChange={(e) => setSelectedCounty(e.target.value)} className="p-2 border rounded-md">
           <option value="">County: Select</option>
         </select>
@@ -71,7 +75,7 @@ const ResultsDashboard = () => {
         <select value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)} className="p-2 border rounded-md">
           <option value="">Ward: Select</option>
         </select>
-      </div>
+      </div> */}
 
       {/* Candidates Results Table */}
       <div className="overflow-x-auto bg-white shadow-md rounded-md">
