@@ -94,7 +94,8 @@ const AdminDashboard = () => {
           <li
             className={`cursor-pointer transition duration-200 hover:text-blue-400 text-xl py-4`}
             onClick={() => {setActiveSection("manageRegions")
-              setActiveNav(["Add Region","Edit Region","Delete Region"])
+              setActiveNav(["View Region","Edit Region"])
+              setSubNav("View Region")
             }}
           >
             Manage Regions
@@ -149,9 +150,7 @@ const AdminDashboard = () => {
                   </h2>
                 )
               })}
-              {/* Can add extra navbar actions here if needed */}
             </div>
-          {/* )} */}
         </div>
 
         {/* Scrollable Content Area */}

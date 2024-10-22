@@ -1,5 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../../../AppContext';
+import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
 
 const CandidatesAvailable = () => {
     const value=useContext(AppContext)
@@ -8,13 +10,17 @@ const CandidatesAvailable = () => {
   const [currentPage, setCurrentPage] = useState(1);
     const [showActions,setShowActions]=useState()
     const [show,setShow]=useState(false)
-  // Function to handle search
+  // Function to handle search term change
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
-  const candidates=candidates1.filter((candidate)=>{
+  //filter candidates to only display candidates for upcoming elections
+  const filteredCandidates=candidates1.filter((candidate)=>{return candidate.election.status!=="Closed"})
+    console.log(filteredCandidates)
+  //filter candidates to be displayed based on search input
+  const candidates=filteredCandidates.filter((candidate)=>{
     if(searchTerm===""){return true}
-    else{return candidate.voter.user.name.toLowerCase().includes(searchTerm.toLowerCase())}
+    else{return candidate.voter && candidate.voter.user.name.toLowerCase().includes(searchTerm.toLowerCase())}
   })
   // Calculate total pages
   const candidatesPerPage = 10;
@@ -24,9 +30,28 @@ const CandidatesAvailable = () => {
   const startIndex = (currentPage - 1) * candidatesPerPage;
   const currentCandidates = candidates.slice(startIndex, startIndex + candidatesPerPage);
 
+  function deleteCandidate(id){
+    Swal.fire({
+      title: 'Warning!',
+      text: `You are about to delete ${name} from the candidates list!`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Proceed',
+      cancelButtonText: 'Cancel'
+  }).then(res=>{if(res.isConfirmed){
+    fetch(`http://127.0.0.1:5555/candidate/${id}`,{
+      method:"DELETE"
+    })
+    .then(res=>{
+      if(res.ok){toast.success("Candidate deleted successfully")}
+    })
+  }})
+  }
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold mb-4">Candidates Available</h2>
+      <h2 className="text-2xl font-bold mb-4">Candidates available for ongoing and upcoming elections</h2>
       
       <div className="flex mb-4">
         <input
@@ -35,12 +60,15 @@ const CandidatesAvailable = () => {
           onChange={handleSearch}
           className="border border-gray-300 p-2 rounded-l"
         />
-        {/* <button className="bg-blue-500 text-white  rounded-r">
-          <i className="fas fa-filter">Filter</i> {/* Placeholder for filter icon */}
-        {/* </button> */} 
+        {/* <label>Select County</label>
+        <select className='w-full p-2 border border-gray-300 rounded-md' onChange={(e)=>{setSelectCounty(e.target.value); setselectConstituency(""); setselectWard("")}}>
+          <option value="">Select County</option>
+          {value.regions.counties.map((county,index)=>{return (
+            <option key={index} value={county.name}>{county.name}</option>
+          )})}
+        </select> */}
       </div>
-
-      <table className="min-w-full bg-white border border-gray-300">
+      {currentCandidates.length>0 && <table className="min-w-full bg-white border border-gray-300">
         <thead>
           <tr className="bg-gray-200">
             <th className="p-3 border">Name</th>
@@ -56,10 +84,10 @@ const CandidatesAvailable = () => {
               <td className="p-3 border flex items-center">
                 <img 
                     src={candidate.image_url} // Ensure this matches your data property
-                    alt={`${candidate.voter.user.name}`} 
+                    alt={candidate.voter && `${candidate.voter.user.name}`} 
                     className="w-12 h-12 rounded-full mr-7" // Added margin-right for spacing
                 />
-                <span>{candidate.voter.user.name}</span> {/* Display the candidate's name */}
+                <span>{candidate.voter && candidate.voter.user.name}</span> {/* Display the candidate's name */}
             </td>
                 <td className="p-3 border">{candidate.position==="President"?"Countrywide":candidate.region}</td>
               <td className="p-3 border">{candidate.position}</td>
@@ -86,12 +114,9 @@ const CandidatesAvailable = () => {
                   {showActions===candidate.id && show&& <div className=" absolute right-0 z-10 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     {/* <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"> */}
                       <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
-                        View
-                      </a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
                         Edit
                       </a>
-                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">
+                      <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem" onClick={()=>deleteCandidate(candidate.id)}>
                         Delete
                       </a>
                     {/* </div> */}
@@ -104,7 +129,7 @@ const CandidatesAvailable = () => {
 
           ))}
         </tbody>
-      </table>
+      </table>}
 
       {/* Pagination */}
       <div className="mt-4 flex justify-between items-center">

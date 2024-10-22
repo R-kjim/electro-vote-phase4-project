@@ -2,17 +2,17 @@ import React, { useContext, useState } from 'react'
 import { AppContext } from '../../../AppContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import DisplayRegions from './DisplayRegions'
 
 const ManageRegions = () => {
   const value=useContext(AppContext)
+  const subNav=value.subNav
   const navigate=useNavigate()
   const [countyName,setCountyName]=useState("")
   const [constituency,setConstituency]=useState({
     county:"",
     name:''
   })
-
-
   //function to handle add county
   function addCountyFn(event){
     event.preventDefault()
@@ -96,7 +96,97 @@ const ManageRegions = () => {
   }
   return (
     <div>
-      <section className="mb-6">
+      {subNav==="View Region" && 
+      <><DisplayRegions /></>
+    //    <div className="mt-8 p-6 bg-white rounded-lg shadow-md">
+    //    <h2 className="text-2xl font-bold mb-4">Regions</h2>
+       
+    //    <div className="mb-6">
+    //      <label className="block text-gray-700">Filter by County</label>
+    //      {/* <select
+    //        className="mt-1 block w-full p-2 border rounded-lg"
+    //        value={selectedCounty}
+    //        onChange={(e) => {
+    //          setSelectedCounty(e.target.value);
+    //          setSelectedConstituency('');
+    //          setSelectedWard('');
+    //        }}
+    //      >
+    //        <option value="">Select County</option>
+    //        {counties.map((county, index) => (
+    //          <option key={index} value={county}>
+    //            {county}
+    //          </option>
+    //        ))}
+    //      </select> */}
+    //    </div>
+ 
+    //    <div className="mb-6">
+    //      <label className="block text-gray-700">Filter by Constituency</label>
+    //      {/* <select
+    //        className="mt-1 block w-full p-2 border rounded-lg"
+    //        value={selectedConstituency}
+    //        onChange={(e) => {
+    //          setSelectedConstituency(e.target.value);
+    //          setSelectedWard('');
+    //        }}
+    //      >
+    //        <option value="">Select Constituency</option>
+    //        {constituencies.map((constituency, index) => (
+    //          <option key={index} value={constituency}>
+    //            {constituency}
+    //          </option>
+    //        ))}
+    //      </select> */}
+    //    </div>
+ 
+    //    <div className="mb-6">
+    //      <label className="block text-gray-700">Filter by Ward</label>
+    //      {/* <select
+    //        className="mt-1 block w-full p-2 border rounded-lg"
+    //        value={selectedWard}
+    //        onChange={(e) => setSelectedWard(e.target.value)}
+    //      >
+    //        <option value="">Select Ward</option>
+    //        {wards.map((ward, index) => (
+    //          <option key={index} value={ward}>
+    //            {ward}
+    //          </option>
+    //        ))}
+    //      </select> */}
+    //    </div>
+ 
+    //    <div className="overflow-x-auto">
+    //      <table className="min-w-full bg-white border rounded-lg shadow-md">
+    //        <thead>
+    //          <tr className="bg-gray-200 text-gray-700">
+    //            <th className="p-4 border">ID</th>
+    //            <th className="p-4 border">County</th>
+    //            <th className="p-4 border">Constituency</th>
+    //            <th className="p-4 border">Ward</th>
+    //          </tr>
+    //        </thead>
+    //        {/* <tbody>
+    //          {filteredRegions.length > 0 ? (
+    //            filteredRegions.map(region => (
+    //              <tr key={region.id} className="hover:bg-gray-100">
+    //                <td className="p-4 border">{region.id}</td>
+    //                <td className="p-4 border">{region.county}</td>
+    //                <td className="p-4 border">{region.constituency}</td>
+    //                <td className="p-4 border">{region.ward}</td>
+    //              </tr>
+    //            ))
+    //          ) : (
+    //            <tr>
+    //              <td colSpan="4" className="p-4 text-center text-gray-500">No regions found.</td>
+    //            </tr>
+    //          )}
+    //        </tbody> */}
+    //      </table>
+    //    </div>
+    //  </div>
+        }
+     {subNav==="Edit Region" && <section className="mb-6">
            <h2 className="text-2xl font-bold mb-4">Manage Regions</h2>
            {/* Add County */}
            <form className="mb-4" onSubmit={addCountyFn}>
@@ -148,7 +238,7 @@ const ManageRegions = () => {
             />
             <button className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700">Add Ward</button>
           </form>
-        </section>
+      </section>}
     </div>
   )
 }

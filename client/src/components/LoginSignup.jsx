@@ -59,21 +59,30 @@ const LoginSignup = () => {
         body:JSON.stringify(loginData)
       })
       .then(res=>{
-        if(res){
-          return res.json()
+        if(res.ok){
+          return res.json().then(data=>{
+            localStorage.setItem("userId",data.user)
+            localStorage.setItem("accessToken",data.access_token)
+            localStorage.setItem("refreshToken",data.referesh_token)
+            if(data.role==="Voter"){
+              navigate(`/dashboard/user/${localStorage.getItem("userId")}`)
+                window.location.reload()
+            }
+              else if(data.role==="Admin"){
+                navigate(`/admin/dashboard/${localStorage.getItem("userId")}`)
+                window.location.reload()
+              }
+          })
+        }else{
+          return res.json().then(errorData=>{
+            toast.error(errorData.error[0])
+          })
         }
       })
-      .then(data=>{
-        localStorage.setItem("userId",data.user)
-        if(data.role==="Voter"){
-        navigate(`/dashboard/user/${localStorage.getItem("userId")}`)
-          window.location.reload()
-      }
-        else if(data.role==="Admin"){
-          navigate(`/admin/dashboard/${localStorage.getItem("userId")}`)
-          window.location.reload()
-        }
-      })
+      // .then(data=>{
+       
+       
+      // })
     }
   };
 
