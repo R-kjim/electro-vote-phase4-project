@@ -80,7 +80,6 @@ const ElectionDetails = () => {
                             },
                             body: JSON.stringify(item)
                         })
-                        // .then(res=>console.log(res))
                     );
                 }
     
@@ -242,14 +241,7 @@ const ElectionDetails = () => {
                     election.type!=="General" &&election.candidates&&(
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 "> {/* Grid container */}
                         {election.candidates
-                            // .filter(position => position.position === selectedPosition)
-                            // .filter(position => {
-                            //     if (position.position === "Governor") { return position.region === value.userData.voter[0].county.name; }
-                            //     if (position.position === "Senator") { return position.region === value.userData.voter[0].county.name; }
-                            //     if (position.position === "MP") { return position.region === value.userData.voter[0].constituency.name; }
-                            //     if (position.position === "MCA") { return position.region === value.userData.voter[0].ward.name; }
-                            //     if (position.position === "President") { return position; }
-                            // })
+                          
                             .map((position, index) => (
                                 <section key={index} className={`mb-4 transition-shadow duration-200 ease-in-out transform  ${position.id===myVotes[position.position]? 'border border-green-500':"hover:scale-105"}`}> 
                                     <div className={`bg-white p-4 rounded-lg shadow-md ${position.id===myVotes[position.position]?null:"hover:shadow-lg"}  flex flex-col items-center`}>
@@ -264,7 +256,6 @@ const ElectionDetails = () => {
                                         <button
                                             className={`mt-4 ${position.id===myVotes[position.position]? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'} text-white px-6 py-2 rounded-lg  transition-colors shadow-md`}
                                             onClick={() => handleVote(position.id, position.position)}
-                                            // onClick={() => console.log("Yeaah")}
                                             disabled={position.id===myVotes[position.position]}
                                             // aria-label={`Vote for ${position.voter.user.name}`}
                                         >

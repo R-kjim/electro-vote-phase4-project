@@ -11,6 +11,7 @@ const ResultsDashboard = () => {
   const [totalVotes,setTotalVotes]=useState(0)
   const [leader,setLeader]=useState()
   const [electionType,setElectionType]=useState("")
+  const [selectedZone,setSelectedZone]=useState("")
   const positions = ["President",'Governor', 'Senator', 'MP', 'MCA'];
 
   const value=useContext(AppContext)
@@ -21,12 +22,16 @@ const ResultsDashboard = () => {
     
     return election.name===selectedElection
   })
-
   useEffect(()=>{
+
     if(filteredElection[0] && filteredElection[0].candidates.length>0){
       setElectionType(filteredElection[0].type)
       if(filteredElection[0].type!=="General"){setSelectedPosition(filteredElection[0].type)}
-      const filteredCandidates=filteredElection[0].candidates.filter((candidate)=>{return (candidate.position===selectedPosition)})
+      const filteredCandidates=filteredElection[0].candidates.filter((candidate)=>{
+        if(selectedPosition!=="President"){
+        return (candidate.position===selectedPosition && candidate.region===selectedZone)}
+          else{return candidate.position===selectedPosition}
+      })
       setFilteredCandidates(filteredCandidates)
       let x=0
       let lead=0
@@ -38,9 +43,28 @@ const ResultsDashboard = () => {
       setTotalVotes(x)
       setLeader(leadId)
     }
-  },[selectedElection,selectedPosition])
+  },[selectedElection,selectedPosition,selectedZone,value])
+  function dynamicValue(){
+    let counties=[]
+    let constituencies=[]
+    let wards=[]
+    for(let item of value.regions.counties){counties.push(item.name)}
+    for(let item of value.regions.constituencies){constituencies.push(item.name)
+      for(let ward of item.wards){wards.push(ward.name)}
+    }
+    switch (selectedPosition) {
+      case "Governor":
+        return{keyword:"County",regions:counties} 
+      case "Senator":
+        return{keyword:"County",regions:counties} 
+      case "MP":
+        return{keyword:"Constituency",regions:constituencies} 
+      case "MCA":
+        return{keyword:"Ward",regions:wards} 
+    }
+  }
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 mt-16">
       {/* Election Dropdown */}
       <div className="mb-4">
         <select value={selectedElection} onChange={(e) => setSelectedElection(e.target.value)} className="p-2 border rounded-md w-full">
@@ -52,11 +76,16 @@ const ResultsDashboard = () => {
                     <button
                         key={index}
                         onClick={() => setSelectedPosition(position)}
-                        className="flex-grow px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className={`flex-grow px-4 py-2 ${position===selectedPosition?"bg-green-700":"bg-blue-500 hover:bg-blue-600"} text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-400`}
                         >
                         {position}
                     </button>
                 ))}
+               {selectedPosition!=="President" && <select className='w-full' value={selectedZone} onChange={(e)=>{setSelectedZone(e.target.value)}}>
+                  <option >Select {dynamicValue().keyword}
+                  </option>
+                  {dynamicValue().regions.map((region,index)=>{return <option key={index} value={region}>{region}</option>})}
+                </select>}
         </div>}
       </div>
 
@@ -81,6 +110,8 @@ const ResultsDashboard = () => {
             <tr className="border-b">
               <th className="p-4">Name</th>
               <th className="p-4">Party</th>
+              <th className="p-4">Votes Garnered</th>
+              <th className="p-4">Total Votes Cast</th>
               <th className="p-4">% of Votes</th>
             </tr>
           </thead>
@@ -90,12 +121,14 @@ const ResultsDashboard = () => {
                 <td className="p-4">
                 <img 
                     src={`${candidate.image_url}`} 
-                    alt={`${candidate.voter.user.name}`} 
+                    alt={`${candidate.voter && candidate.voter.user.name}`} 
                     className="w-12 h-12 rounded-full mr-7" 
                 />
-                <span>{candidate.voter.user.name}</span>
+                <span>{candidate.voter && candidate.voter.user.name}</span>
                 </td>
                 <td className="p-4">{candidate.party}</td>
+                <td className='text-center'>{candidate.votes.length}</td>
+                <td className="text-center">{totalVotes}</td>
                 <td className="p-4">
                   <div className="flex items-center">
                     <div
@@ -109,6 +142,7 @@ const ResultsDashboard = () => {
              ))}
            </tbody>
         </table> }
+        {!filteredCandidates && <p className='text-center text-red-600 mt-4 font-semibold'>No data to display at the moment</p>}
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ class Voter(db.Model, SerializerMixin):
     vote=db.relationship("Vote",back_populates="voter")
     # votes = db.relationship('Vote', back_populates='voter')
     #serialize rules
-    serialize_rules=("-user.voter",'-user.id','-user.role','-user.email','-county.wards','-county.constituencies','-county.voters','-id','-county_id','-ward_id',
+    serialize_rules=("-user.voter",'-user.id','-user.role','-user.email','-county.wards','-county.constituencies','-county.voters','-county_id','-ward_id',
                      '-user_id','-constituency_id','-county.id','-ward.voters',
                      '-ward.county','-ward.constituency','-ward.constituency_id','-ward.id','-ward.county_id',
                       '-constituency.county_id','-constituency.voters','-constituency.county','-constituency.wards','-constituency.id',

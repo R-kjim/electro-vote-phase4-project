@@ -11,11 +11,12 @@ const RegisterCandidate = () => {
   const [positions, setPositions] = useState(['President', 'Governor', 'Senator', 'MP',"MCA"]);
   const [candidateName, setCandidateName] = useState('');
   const[region,setRegion]=useState("")
+  const [myFile,setMyFile]=useState(null)
   const[candidateData, setCandidateData]=useState({
     election:"",
     position:"",
     name:"",
-    region:region
+    region:region,
   })
   const allCandidateNames = value.voters
   const [candidate,setCandidate]=useState({})
@@ -26,7 +27,7 @@ const RegisterCandidate = () => {
     setCandidateSuggestions([]); // Hide suggestions after selection
   };
   const [selectedFile,setSelectedFile]=useState(null)
-  const [imageUrl,setImageUrl]=useState("")
+  const [file,setImageUrl]=useState("")
    //upcoming elections
    const filterPending=value.elections.filter((election)=>{
     return (election.status==="Pending")
@@ -39,11 +40,30 @@ const RegisterCandidate = () => {
       [name]:value,
     })
   }
+  let handleAddFile=(event)=>{
+    setMyFile(event.target.files[0])
+  }
   function addCandidateFn(event){
     event.preventDefault();
     candidateData.name = candidate.national_id; // Map voter id
     candidateData.region = region; // Set the region
+    let formData=new FormData()
   
+  if(myFile){
+    formData.append("file",myFile)
+  }
+ 
+  fetch("http://127.0.0.1:5555/uploads",{
+    method:"POST",
+    body:formData
+  })
+  .then(res=>{
+    if(res.ok){
+      return res.json().then(data=>{candidateData.image_url=data.file_path})
+    }else{
+      return res.json()
+    }
+  })
     fetch("http://127.0.0.1:5555/candidates", {
       method: "POST",
       headers: {
@@ -198,12 +218,12 @@ const RegisterCandidate = () => {
           {/* Image URL */}
           <label className="block mb-2">Image URL:</label>
           <input 
-            type="text" 
+            type="file" 
             name="image_url" 
             placeholder="Enter Image URL" 
             className="border p-2 rounded-lg w-full mb-2" 
-            onChange={handleAddCandidate} 
-            value={candidateData.image_url || ""} 
+            onChange={handleAddFile} 
+            // value={candidateData.image_url || ""} 
           />
           {selectedFile &&<img src={imageUrl} alt='image'/>}
           {/* Register Candidate Button */}

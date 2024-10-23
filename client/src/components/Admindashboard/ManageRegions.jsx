@@ -2,17 +2,17 @@ import React, { useContext, useState } from 'react'
 import { AppContext } from '../../../AppContext'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
+import DisplayRegions from './DisplayRegions'
 
 const ManageRegions = () => {
   const value=useContext(AppContext)
+  const subNav=value.subNav
   const navigate=useNavigate()
   const [countyName,setCountyName]=useState("")
   const [constituency,setConstituency]=useState({
     county:"",
     name:''
   })
-
-
   //function to handle add county
   function addCountyFn(event){
     event.preventDefault()
@@ -96,7 +96,7 @@ const ManageRegions = () => {
   }
   return (
     <div>
-      <section className="mb-6">
+     {subNav==="Add Region" && <section className="mb-6">
            <h2 className="text-2xl font-bold mb-4">Manage Regions</h2>
            {/* Add County */}
            <form className="mb-4" onSubmit={addCountyFn}>
@@ -148,7 +148,7 @@ const ManageRegions = () => {
             />
             <button className="bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700">Add Ward</button>
           </form>
-        </section>
+      </section>}
     </div>
   )
 }

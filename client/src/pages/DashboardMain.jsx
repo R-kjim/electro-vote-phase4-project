@@ -7,11 +7,8 @@ const DashboardMain = () => {
     const value=useContext(AppContext)
   return (
     <>
-    {value.userData.email?<div>
-        {/* {value.loginStatus? */}
+    {value.userData.email?<div className='mt-16'>
       <Outlet />
-      {/* // :null */}
-        {/* } */}
     </div>:<LoadingPage />}
     </>
   )

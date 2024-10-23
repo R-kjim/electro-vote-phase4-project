@@ -1,24 +1,33 @@
 from models import db,User,Constituency,County,Ward,Voter,Candidate,Election,Vote
 from flask_migrate import Migrate
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response,jsonify
 from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager,create_access_token, create_refresh_token,jwt_required,get_jwt_identity
 import secrets,datetime,os
 from datetime import timedelta
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get(
     "DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
+#upload images assist
+UPLOAD_FOLDER="/home/robert/Documents/projects/electro-vote-phase4-project/server/static"
+ALLOWED_EXTENSIONS=set(['png','jpeg','jpg'])
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] =secrets.token_hex(32)
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)  
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)  
-app.json.compact = False
+app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
+
 
 migrate = Migrate(app, db)
 
@@ -28,6 +37,29 @@ bcrypt = Bcrypt(app)
 jwt=JWTManager(app)
 
 CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"])
+
+
+class Upload_Files(Resource):
+    def post(self):
+        if 'file' not in request.files:
+            return make_response({"error":["media file not found"]},400)
+        file=request.files['file']
+        if file.name=='':
+            return make_response({"error":["No file selected"]},400)
+        if file and allowed_file(file.filename):
+            filename=secure_filename(file.filename)
+            file_path=os.path.join(app.config["UPLOAD_FOLDER"],filename)
+            file.save(file_path)
+            return make_response({"file_path":file_path},200)
+api.add_resource(Upload_Files, '/uploads')
+class Refresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        id=get_jwt_identity()
+        new_access_token=create_access_token(identity=id)
+        print(new_access_token)
+        return jsonify(access_token=new_access_token),200
+api.add_resource(Refresh,'/refresh')
 
 class Signup(Resource):
     def post(self):
@@ -51,13 +83,15 @@ class Signup(Resource):
 api.add_resource(Signup,'/signup')
 
 class User_By_Id(Resource):
-    def get(self,id):
+    @jwt_required()
+    def get(self):
+        id=get_jwt_identity()
         user=User.query.filter_by(id=id).first()
         if user:
             return make_response(user.to_dict(),200)
         else:
             return make_response({"error":["User not found"]},404)
-api.add_resource(User_By_Id,'/user/<int:id>')
+api.add_resource(User_By_Id,'/user')
 
 class Add_Get_County(Resource):
     def get(self):
@@ -212,11 +246,11 @@ class Login(Resource):
         user=User.query.filter_by(email=email).first()
         if user:
             if bcrypt.check_password_hash(user.password, password):
-                access_token=create_access_token(identity={"email":user.id})
+                access_token=create_access_token(identity=user.id)
                 refresh_token=create_refresh_token(identity=user.id)
 
                 return make_response({"access_token":access_token,"refresh_token":refresh_token,"user":user.id,"role":user.role},200)
-            return make_response({"error":["Wrong password"]})
+            return make_response({"error":["Wrong password"]},400)
         return make_response({"error":[f"{email} not registered. Proceed to signup?"]},404)
 api.add_resource(Login,'/login')
 
@@ -277,6 +311,13 @@ class Voter_Details(Resource):
             return make_response(voter.to_dict(),200)
         else:
             return make_response({"error":["Voter doesn't exist"]})
+    def delete(self,id):
+        voter=Voter.query.filter_by(id=id).first()
+        if voter:
+            db.session.delete(voter)
+            db.session.commit()
+            return make_response({"message":["Voter deleted successfully"]},204)
+        return make_response({"error":["Voter not found"]},404)
 api.add_resource(Voter_Details,'/add-voter-details/<int:id>')
 
 class Get_Voters(Resource):
@@ -330,6 +371,7 @@ class Add_Get_Candidate(Resource):
 
     def get(self):
         candidates=Candidate.query.all()
+        
         return make_response([candidate.to_dict() for candidate in candidates],200)
 api.add_resource(Add_Get_Candidate,'/candidates')
 
@@ -482,6 +524,7 @@ class VoteResource(Resource):
     def get(self):
         votes=Vote.query.all()
         return make_response([vote.to_dict() for vote in votes],200)
+
 api.add_resource(VoteResource,'/vote')
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
