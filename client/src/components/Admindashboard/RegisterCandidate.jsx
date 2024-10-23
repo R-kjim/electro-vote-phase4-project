@@ -61,33 +61,32 @@ const RegisterCandidate = () => {
     if(res.ok){
       return res.json().then(data=>{candidateData.image_url=data.file_path})
     }else{
-      return res.json().then(data=>console.log(data))
+      return res.json()
     }
   })
-  console.log(candidateData)
-  //   fetch("http://127.0.0.1:5555/candidates", {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify(candidateData)
-  //   })
-  //   .then(res => {
-  //     if (res.ok) {
-  //       toast.success("Candidate added successfully");
-  //       navigate(`/admin/dashboard/${value.userId}`)
-  //       return res.json();
-  //     } else {
-  //       return res.json().then(errorData => {
-  //         toast.error(errorData.error[0]);
-  //       });
-  //     }
-  //   })
-  //   .catch(err => {
-  //     toast.error("An error occurred. Please try again.");
-  //   });
+    fetch("http://127.0.0.1:5555/candidates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(candidateData)
+    })
+    .then(res => {
+      if (res.ok) {
+        toast.success("Candidate added successfully");
+        navigate(`/admin/dashboard/${value.userId}`)
+        return res.json();
+      } else {
+        return res.json().then(errorData => {
+          toast.error(errorData.error[0]);
+        });
+      }
+    })
+    .catch(err => {
+      toast.error("An error occurred. Please try again.");
+    });
   
-  //   event.target.reset();
+    event.target.reset();
   }
   const handleNameInputChange = (e) => {
     const value = e.target.value;

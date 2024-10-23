@@ -16,7 +16,6 @@ const CandidatesAvailable = () => {
   };
   //filter candidates to only display candidates for upcoming elections
   const filteredCandidates=candidates1.filter((candidate)=>{return candidate.election.status!=="Closed"})
-    console.log(filteredCandidates)
   //filter candidates to be displayed based on search input
   const candidates=filteredCandidates.filter((candidate)=>{
     if(searchTerm===""){return true}

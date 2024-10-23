@@ -140,7 +140,9 @@ const Dashboard1 = () => {
                 </div>
               </div>
               <h3 className="text-lg font-semibold mb-4">Registered Voters:</h3>
-              {filteredVoters.length>0?<table className="min-w-full bg-white border">
+              {filteredVoters.length>0?
+              <div className='overflow-y-auto max-h-80'>
+                <table className="min-w-full bg-white border table-auto">
                 <thead>
                   <tr>
                     <th className="py-2 px-4 border">Name</th>
@@ -169,7 +171,8 @@ const Dashboard1 = () => {
                       </td></tr>
                   ))}
                 </tbody>
-              </table>:<p className='text-center text-gray-600 mt-4'>No voters for the selected regions</p>}
+              </table></div>
+              :<p className='text-center text-gray-600 mt-4'>No voters for the selected regions</p>}
             </div>
           )}
 

@@ -23,6 +23,7 @@ const ResultsDashboard = () => {
     return election.name===selectedElection
   })
   useEffect(()=>{
+
     if(filteredElection[0] && filteredElection[0].candidates.length>0){
       setElectionType(filteredElection[0].type)
       if(filteredElection[0].type!=="General"){setSelectedPosition(filteredElection[0].type)}
@@ -42,7 +43,7 @@ const ResultsDashboard = () => {
       setTotalVotes(x)
       setLeader(leadId)
     }
-  },[selectedElection,selectedPosition,selectedZone])
+  },[selectedElection,selectedPosition,selectedZone,value])
   function dynamicValue(){
     let counties=[]
     let constituencies=[]
@@ -63,7 +64,7 @@ const ResultsDashboard = () => {
     }
   }
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6 mt-16">
       {/* Election Dropdown */}
       <div className="mb-4">
         <select value={selectedElection} onChange={(e) => setSelectedElection(e.target.value)} className="p-2 border rounded-md w-full">
@@ -109,6 +110,8 @@ const ResultsDashboard = () => {
             <tr className="border-b">
               <th className="p-4">Name</th>
               <th className="p-4">Party</th>
+              <th className="p-4">Votes Garnered</th>
+              <th className="p-4">Total Votes Cast</th>
               <th className="p-4">% of Votes</th>
             </tr>
           </thead>
@@ -124,6 +127,8 @@ const ResultsDashboard = () => {
                 <span>{candidate.voter && candidate.voter.user.name}</span>
                 </td>
                 <td className="p-4">{candidate.party}</td>
+                <td className='text-center'>{candidate.votes.length}</td>
+                <td className="text-center">{totalVotes}</td>
                 <td className="p-4">
                   <div className="flex items-center">
                     <div
@@ -137,6 +142,7 @@ const ResultsDashboard = () => {
              ))}
            </tbody>
         </table> }
+        {!filteredCandidates && <p className='text-center text-red-600 mt-4 font-semibold'>No data to display at the moment</p>}
       </div>
     </div>
   );

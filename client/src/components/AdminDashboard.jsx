@@ -94,8 +94,8 @@ const AdminDashboard = () => {
           <li
             className={`cursor-pointer transition duration-200 hover:text-blue-400 text-xl py-4`}
             onClick={() => {setActiveSection("manageRegions")
-              setActiveNav(["View Region","Edit Region"])
-              setSubNav("View Region")
+              setActiveNav(["Add Region"])
+              setSubNav("Add Region")
             }}
           >
             Manage Regions
@@ -122,23 +122,15 @@ const AdminDashboard = () => {
           <li
             className={`cursor-pointer transition duration-200 hover:text-blue-400 text-xl py-4`}
             onClick={() => {setActiveSection("electionResults")
-              setActiveNav(["Results By Election","Results By Region"])
+              setActiveNav(["View election Results from past elections. Selecct an election and navigate through regions"])
             }}
           >
             View Election Results
           </li>
-          <li
-            className={`cursor-pointer transition duration-200 hover:text-blue-400 text-xl py-4`}
-            onClick={() => {setActiveSection("manageVoterRegistration")
-              setActiveNav(["View Voters","Add Voter","Edit Voter","Delete Voter"])
-            }}
-          >
-            Manage Voter Registration
-          </li>
         </ul>
       </div>
       {/* Main Body Content */}
-      <div className="w-4/5 ml-auto">
+      <div className="w-4/5 ml-auto mt-16">
         {/* Static Top Navbar (specific to the active section) */}
         <div className="sticky top-0 bg-white p-4 shadow-md mb-6">
           {/* {activeSection !== "dashboard" && ( */}

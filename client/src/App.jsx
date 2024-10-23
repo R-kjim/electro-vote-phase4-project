@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Homepage from './components/Homepage';
 import LoginSignup from './components/LoginSignup';
-import ElectionResults from './pages/ElectionResults';
 import Dashboard from './pages/Dashboard';
 import ElectionDetails from './components/ElectionDetails'; // Import ElectionDetails
 import { AppContext } from '../AppContext';
@@ -18,8 +17,7 @@ import ManageRegions from './components/Admindashboard/ManageRegions';
 import RegisterCandidate from './components/Admindashboard/RegisterCandidate';
 import CreateElection from './components/Admindashboard/CreateElection';
 import Dashboard1 from './components/Admindashboard/Dashboard1';
-import ErrorPage from './pages/Error';
-import LoadingPage from './pages/LoadingPage';
+import ResetPassword from './pages/ResetPassword';
 
 
 const App = () => {
@@ -38,12 +36,12 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/election-details/:electionId" element={<ElectionDetails />} /> {/* New route for ElectionDetails */}
+        <Route path='/reset-password' element={<ResetPassword />}/>
+        <Route path="/election-details/:electionId" element={<ElectionDetails />} /> 
         <Route 
           path="/login"
           element={<LoginSignup />} 
         />
-        <Route path='elections-results' element={<ElectionResults />}/>
         <Route path='/dashboard/' element={<DashboardMain />} >
           <Route path='user/:id' element={<Dashboard />}/>
           <Route path='update-details' element={<UpdateDetails />} />

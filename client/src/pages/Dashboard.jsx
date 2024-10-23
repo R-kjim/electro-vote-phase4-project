@@ -202,10 +202,6 @@ const Dashboard = () => {
         <div className="flex space-x-4">
           {isRegisteredVoter ? (
             <>
-              {/* <button className="flex items-center bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                <DocumentIcon className="h-6 w-6 mr-2" />
-                View Voting History
-              </button> */}
               <button className="flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={()=>{
                 value.setUpdateStatus(true)
                 navigate(`/dashboard/update-details`)

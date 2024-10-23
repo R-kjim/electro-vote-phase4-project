@@ -24,9 +24,10 @@ const AppContextProvider = (props) => {
     //fetch functionalities
     useEffect(()=>{
        //refresh token method
+       const accessToken = localStorage.getItem("accessToken");
+
       // Fetch user data
         const fetchUserData = async () => {
-          const accessToken = localStorage.getItem("accessToken");
           const refreshToken=localStorage.getItem("refreshToken")
           try {
             let response = await fetch("http://127.0.0.1:5555/user", {
@@ -99,7 +100,12 @@ const AppContextProvider = (props) => {
         .then(data=>setElections(data))
 
         //fetch voters data
-        fetch("http://127.0.0.1:5555/voters")
+        fetch("http://127.0.0.1:5555/voters",{
+          method:"GET",
+          headers:{
+            "Authorization":`Bearer ${localStorage.getItem("accessToken")}`
+          }
+        })
         .then(res=>res.json())
         .then(data=>setVoters(data))
 
