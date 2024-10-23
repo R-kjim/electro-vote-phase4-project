@@ -50,7 +50,7 @@ class Upload_Files(Resource):
             filename=secure_filename(file.filename)
             file_path=os.path.join(app.config["UPLOAD_FOLDER"],filename)
             file.save(file_path)
-            return make_response({"file_path":file_path},200)
+            return make_response({"file_path":filename},200)
 api.add_resource(Upload_Files, '/uploads')
 class Refresh(Resource):
     @jwt_required(refresh=True)
@@ -86,13 +86,26 @@ class User_By_Id(Resource):
     @jwt_required()
     def get(self):
         id=get_jwt_identity()
-        user=User.query.filter_by(id=id).first()
-        if user:
-            return make_response(user.to_dict(),200)
-        else:
-            return make_response({"error":["User not found"]},404)
+        if id:
+            user=User.query.filter_by(id=id).first()
+            if user:
+                return make_response(user.to_dict(),200)
+            else:
+                return make_response({"error":["User not found"]},404)
 api.add_resource(User_By_Id,'/user')
 
+class User_By_Email(Resource):
+    def patch(self,email):
+        user=User.query.filter_by(email=email).first()
+        if user:
+            data=request.get_json()
+            for attr in data:
+                if attr=="password":
+                    setattr(user,attr,bcrypt.generate_password_hash(data[attr]).decode('utf-8'))
+            db.session.commit()
+            return make_response(user.to_dict(),200)
+        return make_response({"error":["No user matches your email"]},404)
+api.add_resource(User_By_Email,'/user/<string:email>')
 class Add_Get_County(Resource):
     def get(self):
         counties=County.query.all()
@@ -321,9 +334,12 @@ class Voter_Details(Resource):
 api.add_resource(Voter_Details,'/add-voter-details/<int:id>')
 
 class Get_Voters(Resource):
+    @jwt_required()
     def get(self):
-        voters=Voter.query.all()
-        return make_response([voter.to_dict() for voter in voters],200)
+        id=get_jwt_identity()
+        if id:
+            voters=Voter.query.all()
+            return make_response([voter.to_dict() for voter in voters],200)
 api.add_resource(Get_Voters, '/voters')
 
 class Add_Get_Candidate(Resource):
@@ -334,16 +350,14 @@ class Add_Get_Candidate(Resource):
         voter_id = data["name"]
         election1 = data["election"]
         region = data["region"]
-        
+        image_url=data["image_url"]
+        party=data["party"]
+        description=data["description"]
         # Get the new fields
-        party = data.get("party")
-        description = data.get("description")
-        image_url = data.get("image_url")
         
         election = Election.query.filter_by(name=election1).first()
         voter = Voter.query.filter_by(national_id=voter_id).first()
         candidate1=Candidate.query.filter_by(voter_id=voter.id).first()
-        
         if candidate1 and candidate1.election_id==election.id:
             return make_response({"error":["This candidate is already participating in this election"]},400)
         if voter:
@@ -371,8 +385,14 @@ class Add_Get_Candidate(Resource):
 
     def get(self):
         candidates=Candidate.query.all()
-        
-        return make_response([candidate.to_dict() for candidate in candidates],200)
+        all_candidates=[]
+        for candidate in candidates:
+            candidate=candidate.to_dict()
+        #     print(candidate["image_url"])
+            candidate['image_url']=f"{request.host_url}/static/{candidate["image_url"]}"
+            all_candidates.append(candidate)
+            
+        return make_response(all_candidates,200)
 api.add_resource(Add_Get_Candidate,'/candidates')
 
 class Candidate_By_Id(Resource):
