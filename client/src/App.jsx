@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Homepage from './components/Homepage';
 import LoginSignup from './components/LoginSignup';
-import ElectionResults from './pages/ElectionResults';
 import Dashboard from './pages/Dashboard';
 import ElectionDetails from './components/ElectionDetails'; // Import ElectionDetails
 import { AppContext } from '../AppContext';
@@ -14,6 +13,12 @@ import DashboardMain from './pages/DashboardMain';
 import Admin from './pages/Admin';
 import AdminDashboard from './components/AdminDashboard';
 import ResultsDashboard from './components/ResultsDashboard';
+import ManageRegions from './components/Admindashboard/ManageRegions';
+import RegisterCandidate from './components/Admindashboard/RegisterCandidate';
+import CreateElection from './components/Admindashboard/CreateElection';
+import Dashboard1 from './components/Admindashboard/Dashboard1';
+import ResetPassword from './pages/ResetPassword';
+
 
 const App = () => {
   const [isAdminAvailable, setIsAdminAvailable] = useState(false);
@@ -31,23 +36,30 @@ const App = () => {
       <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
-        <Route path="/election-details/:electionId" element={<ElectionDetails />} /> {/* New route for ElectionDetails */}
+        <Route path='/reset-password' element={<ResetPassword />}/>
+        <Route path="/election-details/:electionId" element={<ElectionDetails />} /> 
         <Route 
           path="/login"
           element={<LoginSignup />} 
         />
-        <Route path='elections-results' element={<ElectionResults />}/>
         <Route path='/dashboard/' element={<DashboardMain />} >
           <Route path='user/:id' element={<Dashboard />}/>
           <Route path='update-details' element={<UpdateDetails />} />
         </Route>
         <Route path='/admin' element={<Admin />}>
-          <Route path='dashboard/:id' element={<AdminDashboard />}/>
+          <Route path='dashboard/:id' element={<AdminDashboard />}>
+            <Route path='' element={<Dashboard1 />}/>
+            <Route path='manage-regions' element={<ManageRegions />}/>
+            <Route path='register-candidate' element={<RegisterCandidate />}/>
+            <Route path='create-election' element={<CreateElection />}/>
+          </Route>
         </Route>
-        <Route path='/results' element={<ResultsDashboard />}/>
+        <Route path='/results' element={<ResultsDashboard />} /> {/* New route  */}
       </Routes>
     </div>
+
   );
 };
 
 export default App;
+

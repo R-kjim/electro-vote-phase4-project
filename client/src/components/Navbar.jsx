@@ -1,18 +1,35 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../../AppContext';
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  const navigate=useNavigate()
+  // useEffect(()=>{
+  //   localStorage.setItem("userId",value.userId)
+  // },[])
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
   const value=useContext(AppContext)
   const setIsRegistering=value.setIsRegistering
-  const isLoggedIn=value.loginStatus
+  const isLoggedIn=value.userId
+
+  function handleLogin(){
+    localStorage.removeItem("userId")
+    navigate('/')
+    window.location.reload()
+  }
+  function loginFN(){
+    let user=value.userData
+    if (user.role==="Admin"){
+      navigate(`/admin/dashboard/${localStorage.getItem("userId")}`)}
+    else if(user.role==="Voter"){navigate(`/dashboard/user/${localStorage.getItem("userId")}`)}
+  }
   return (
-    <nav className="bg-blue-700">
+    <nav className="bg-blue-700 fixed w-full top-0 left-0 z-10">
       <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
@@ -32,9 +49,10 @@ const Navbar = () => {
               <Link to="/results" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">
                 View Results
               </Link>
-             { isLoggedIn?
-             <><Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>{localStorage.removeItem("userId") 
-             value.setLoginStatus(false)}}>
+             { value.userId?
+             <>
+             <button onClick={loginFN} className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400">Dashboard</button>
+             <Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={handleLogin}>
              Logout
             </Link></>:
              <><Link to="/login" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>setIsRegistering(true)}>
@@ -84,7 +102,6 @@ const Navbar = () => {
             </Link>
             {isLoggedIn?
             <><Link to="/" className="text-white px-3 py-2 rounded-md text-sm font-medium hover:text-orange-400" onClick={()=>{localStorage.removeItem("userId")
-              value.setLoginStatus(false)
             }}>
             Logout
            </Link></>

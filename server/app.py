@@ -1,24 +1,35 @@
-from models import db,User,Constituency,County,Ward,Voter,Candidate,Election
+from models import db,User,Constituency,County,Ward,Voter,Candidate,Election,Vote
 from flask_migrate import Migrate
-from flask import Flask, request, make_response
+from flask import Flask, request, make_response,jsonify
 from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager,create_access_token, create_refresh_token,jwt_required,get_jwt_identity
 import secrets,datetime,os
 from datetime import timedelta
 from flask_cors import CORS
+from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash,generate_password_hash
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get(
     "DB_URI", f"sqlite:///{os.path.join(BASE_DIR, 'app.db')}")
+#upload images assist
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'static')
+ALLOWED_EXTENSIONS=set(['png','jpeg','jpg'])
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE
+CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://electravote_db_data_user:1ImBtTCbYFMbEB3K4luj6bLcBjbHDlVi@dpg-csckbl56l47c739bvpk0-a.oregon-postgres.render.com/electravote_db_data"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] =secrets.token_hex(32)
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=15)  
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)  
-app.json.compact = False
+app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
+
 
 migrate = Migrate(app, db)
 
@@ -27,7 +38,31 @@ api=Api(app)
 bcrypt = Bcrypt(app)
 jwt=JWTManager(app)
 
-CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"], methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+# CORS(app, resources={r"/elections/*": {"origins": "https://electra-dummy-1.onrender.com"}})
+
+
+class Upload_Files(Resource):
+    def post(self):
+        if 'file' not in request.files:
+            return make_response({"error":["media file not found"]},400)
+        file=request.files['file']
+        if file.filename=='':
+            return make_response({"error":["No file selected"]},400)
+        if file and allowed_file(file.filename):
+            filename=secure_filename(file.filename)
+            file_path=os.path.join(app.config["UPLOAD_FOLDER"],filename)
+            file.save(file_path)
+            return make_response({"file_path":filename},200)
+        return make_response({"error": ["File type not allowed"]}, 400)
+api.add_resource(Upload_Files, '/uploads')
+class Refresh(Resource):
+    @jwt_required(refresh=True)
+    def post(self):
+        id=get_jwt_identity()
+        new_access_token=create_access_token(identity=id)
+        print(new_access_token)
+        return jsonify(access_token=new_access_token),200
+api.add_resource(Refresh,'/refresh')
 
 class Signup(Resource):
     def post(self):
@@ -35,8 +70,8 @@ class Signup(Resource):
         email=data['email']
         password=data['password']
         name=data['name']
-        role='Voter'
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+        role=data["role"]
+        hashed_password = generate_password_hash(password)
         if '@' in email and name!='' and name!=' ':
             user=User.query.filter_by(email=email).first()
             if user:
@@ -51,14 +86,29 @@ class Signup(Resource):
 api.add_resource(Signup,'/signup')
 
 class User_By_Id(Resource):
-    def get(self,id):
-        user=User.query.filter_by(id=id).first()
-        if user:
-            return make_response(user.to_dict(),200)
-        else:
-            return make_response({"error":["User not found"]},404)
-api.add_resource(User_By_Id,'/user/<int:id>')
+    @jwt_required()
+    def get(self):
+        id=get_jwt_identity()
+        if id:
+            user=User.query.filter_by(id=id).first()
+            if user:
+                return make_response(user.to_dict(),200)
+            else:
+                return make_response({"error":["User not found"]},404)
+api.add_resource(User_By_Id,'/user')
 
+class User_By_Email(Resource):
+    def patch(self,email):
+        user=User.query.filter_by(email=email).first()
+        if user:
+            data=request.get_json()
+            for attr in data:
+                if attr=="password":
+                    setattr(user,attr,bcrypt.generate_password_hash(data[attr]).decode('utf-8'))
+            db.session.commit()
+            return make_response(user.to_dict(),200)
+        return make_response({"error":["No user matches your email"]},404)
+api.add_resource(User_By_Email,'/user/<string:email>')
 class Add_Get_County(Resource):
     def get(self):
         counties=County.query.all()
@@ -149,7 +199,7 @@ class Constituency_By_Id(Resource):
         if constituency:
             db.session.delete(constituency)
             db.session.commit()
-            return make_response({"messsage":["Delete successful"]},204)
+            return make_response({"messsage":["Delete successful"]},201)
         return make_response({"error":f"Constituency {id} does not exist"},404)
 api.add_resource(Constituency_By_Id,'/constituency/<int:id>')
 
@@ -211,12 +261,12 @@ class Login(Resource):
         password=data["password"]
         user=User.query.filter_by(email=email).first()
         if user:
-            if bcrypt.check_password_hash(user.password, password):
-                access_token=create_access_token(identity={"email":user.id})
+            if check_password_hash(user.password, password):
+                access_token=create_access_token(identity=user.id)
                 refresh_token=create_refresh_token(identity=user.id)
 
                 return make_response({"access_token":access_token,"refresh_token":refresh_token,"user":user.id,"role":user.role},200)
-            return make_response({"error":["Wrong password"]})
+            return make_response({"error":["Wrong password"]},400)
         return make_response({"error":[f"{email} not registered. Proceed to signup?"]},404)
 api.add_resource(Login,'/login')
 
@@ -245,16 +295,29 @@ class Voter_Details(Resource):
             db.session.commit()
             return make_response(new_voter.to_dict(),201)
         return make_response({"error":["Invalid data entry"]})
-    @jwt_required()
+    # @jwt_required()
     def patch(self,id):
         data=request.get_json()
         voter=Voter.query.filter_by(id=id).first()
         if voter:
-            national_id=data["national_id"]
-            if len(str(national_id))==8 and isinstance(str,national_id):
+            national_id=data["nationalId"]
+            if len(str(national_id))==8:
                 for attr in data:
-                    setattr(voter,attr,data[attr])
-            db.session.add(voter)
+                    if attr=="constituency":
+                        constituency=Constituency.query.filter_by(name=data["constituency"]).first()
+                        if constituency:
+                            setattr(voter,'constituency_id',constituency.id)
+                    if attr=="county":
+                        county=County.query.filter_by(name=data["county"]).first()
+                        if county:
+                            setattr(voter,'county_id',county.id)
+                    if attr=="ward":
+                        ward=Ward.query.filter_by(name=data["ward"]).first()
+                        if ward:
+                            setattr(voter,'ward_id',ward.id)
+                    if attr=='national_id':
+                        setattr(voter,attr,data[attr])
+            # db.session.add(voter)
             db.session.commit()
             return make_response(voter.to_dict(),200)
     # @jwt_required()
@@ -264,40 +327,74 @@ class Voter_Details(Resource):
             return make_response(voter.to_dict(),200)
         else:
             return make_response({"error":["Voter doesn't exist"]})
+    def delete(self,id):
+        voter=Voter.query.filter_by(id=id).first()
+        if voter:
+            db.session.delete(voter)
+            db.session.commit()
+            return make_response({"message":["Voter deleted successfully"]},204)
+        return make_response({"error":["Voter not found"]},404)
 api.add_resource(Voter_Details,'/add-voter-details/<int:id>')
 
 class Get_Voters(Resource):
+    @jwt_required()
     def get(self):
-        voters=Voter.query.all()
-        return make_response([voter.to_dict() for voter in voters],200)
+        id=get_jwt_identity()
+        if id:
+            voters=Voter.query.all()
+            return make_response([voter.to_dict() for voter in voters],200)
 api.add_resource(Get_Voters, '/voters')
 
 class Add_Get_Candidate(Resource):
-    # @jwt_required
     def post(self):
-        data=request.get_json()
-        positions=['President',"Governor","Senator","Member of Parliament","MCA"]
-        position=data["position"]
-        voter_id=data["voter_id"]
-        election1=data["election"]
-        election=Election.query.filter_by(name=election1).first()
-        voter=Voter.query.filter_by(id=voter_id).first()
+        data = request.get_json()
+        positions = ['President', "Governor", "Senator", "MP", "MCA"]
+        position = data["position"]
+        voter_id = data["name"]
+        election1 = data["election"]
+        region = data["region"]
+        image_url=data["image_url"]
+        party=data["party"]
+        description=data["description"]
+        # Get the new fields
+        
+        election = Election.query.filter_by(name=election1).first()
+        voter = Voter.query.filter_by(national_id=voter_id).first()
+        candidate1=Candidate.query.filter_by(voter_id=voter.id).first()
+        if candidate1 and candidate1.election_id==election.id:
+            return make_response({"error":["This candidate is already participating in this election"]},400)
         if voter:
             if position in positions:
-                candidate=Candidate(position=position,voter_id=voter_id,election_id=election.id)
+                # Create the candidate with the new fields
+                candidate = Candidate(
+                    position=position,
+                    voter_id=voter.id,
+                    election_id=election.id,
+                    region=region,
+                    party=party,
+                    description=description,
+                    image_url=f"{request.host_url}/static/{data['image_url']}"
+                )
                 if candidate:
                     db.session.add(candidate)
                     db.session.commit()
-                    return make_response(candidate.to_dict(),201)
+                    return make_response(candidate.to_dict(), 201)
                 else:
-                    return make_response({"error":["An error occured. Kindly try again later"]},500)
+                    return make_response({"error": ["An error occurred. Kindly try again later"]}, 500)
             else:
-                return make_response({"error":[f"Select a position from {positions}"]})
+                return make_response({"error": [f"Select a position from {positions}"]})
         else:
-            return make_response({"error":["Not a registered voter"]},404)
-    
+            return make_response({"error": ["Not a registered voter"]}, 404)
+
     def get(self):
-        candidates=Candidate.query.filter_by(id=id).all()
+        candidates=Candidate.query.all()
+        # all_candidates=[]
+        # for candidate in candidates:
+        #     candidate=candidate.to_dict()
+        # #     print(candidate["image_url"])
+        #     candidate['image_url']=f"{request.host_url}/static/{candidate['image_url']}"
+        #     all_candidates.append(candidate)
+            
         return make_response([candidate.to_dict() for candidate in candidates],200)
 api.add_resource(Add_Get_Candidate,'/candidates')
 
@@ -383,8 +480,76 @@ class Election_By_Id(Resource):
             db.session.commit()
             return make_response({"message":["Election deleted successfully"]},204)
         return make_response({"error":["Election does not exist"]},404)
+    def patch(self,id):
+        election=Election.query.filter_by(id=id).first()
+        if election:
+            data=request.get_json()
+            for attr in data:
+                setattr(election,attr,data[attr])
+            db.session.add(election)
+            db.session.commit()
+            return make_response(election.to_dict(),200)
+        else:
+            return make_response({"error":["Election not found"]},404)
 api.add_resource(Election_By_Id,'/election/<int:id>')
 
+
+class VoteResource(Resource):
+    def post(self):
+        data = request.get_json()
+
+        # Extract the necessary fields
+        candidate_name = data.get('candidate')
+        election_name = data.get('election')
+        voter_national_id = data.get('voter')
+
+        # Check if all required fields are provided
+        if not candidate_name or not election_name or not voter_national_id:
+            return make_response({'message': ['Missing required fields']}, 400)
+
+        # Ensure the election exists
+        election = Election.query.filter_by(name=election_name).first()
+        if not election:
+            return make_response({'message': ['Election not found']}, 404)
+        # Ensure the candidate exists
+        candidate = Candidate.query.filter_by(id=candidate_name, election_id=election.id).first()
+        if not candidate:
+            return make_response({'message': ['Candidate not found in this election']}, 404)
+        # Ensure the voter exists
+        voter = Voter.query.filter_by(national_id=voter_national_id).first()
+        if not voter:
+            return make_response({'message': ['Voter not found']}, 404)
+
+        
+
+        # Check if the voter has already voted in this election
+        existing_vote = Vote.query.filter_by(voter_id=voter.id, election_id=election.id).all()
+        if len(existing_vote)>5:
+            return make_response({'message': ['Voter has already voted in this election']}, 400)
+        # try:
+            # Create a new vote record
+        vote = Vote(
+            candidate_id=candidate.id,
+            election_id=election.id,
+            voter_id=voter.id
+        )
+        if vote:
+        # Add the new vote to the session and commit
+            db.session.add(vote)
+            db.session.commit()
+
+            return  make_response(vote.to_dict(), 201)
+        return make_response({'message': ['An error occurred while processing the vote']}, 500)
+        # except:
+        #     db.session.rollback()
+        #     return make_response({'message': ['An error occurred while processing the vote']}, 500)
+    
+    def get(self):
+        votes=Vote.query.all()
+        return make_response([vote.to_dict() for vote in votes],200)
+
+api.add_resource(VoteResource,'/vote')
 if __name__ == '__main__':
-    app.run(port=5555, debug=True)
+    port = int(os.environ.get("PORT", 5555))
+    app.run(host="0.0.0.0", port=port, debug=True)
 

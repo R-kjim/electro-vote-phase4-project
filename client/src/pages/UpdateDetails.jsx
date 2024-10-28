@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const UpdateDetails = () => {
     const value=useContext(AppContext)
   const regions=value.regions
+  const isUpdate=value.updateStatus
   const [filteredConstituencies,setConstituencies]=useState([])
   const [filteredWards,setWards]=useState([])
   const [formData, setFormData] = useState({
@@ -37,12 +38,14 @@ const UpdateDetails = () => {
   //form submission logic
   function handleSubmit(event){
     event.preventDefault()
-    if (formData.nationalId.toString().length!==8){
+    if (formData.nationalId.toString().length!==8 && isUpdate===false){
         toast.error("Ensure national id number has 8 digits")
     }else{
-        formData.nationalId=parseInt(formData.nationalId)
-        fetch(`http://127.0.0.1:5555/add-voter-details/${value.userId}`,{
-            method:"POST",
+      if(isUpdate){
+        let national_id=value.userData.voter[0].national_id
+      formData.nationalId=national_id
+        fetch(`https://electra-dummy.onrender.com/add-voter-details/${value.userId}`,{
+            method:"PATCH",
             headers:{
                 "Content-Type":"application/json"
             },
@@ -60,7 +63,28 @@ const UpdateDetails = () => {
                   toast.error(errorData.error[0])
                 })
               }
+        })}else{
+        formData.nationalId=parseInt(formData.nationalId)
+        fetch(`https://electra-dummy.onrender.com/add-voter-details/${value.userId}`,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify(formData)
         })
+        .then(res=>{
+            if(res.ok){
+                toast.success("Voter details updated succesfully")
+                // window.location.reload()
+                navigate(`/dashboard/user/${value.userId}`)
+                value.setIsRegisteredVoter(true)
+                return res.json()
+            }else{
+                return res.json().then(errorData=>{
+                  toast.error(errorData.error[0])
+                })
+              }
+        })}
     }
   }
   return (
@@ -140,7 +164,7 @@ const UpdateDetails = () => {
             </div>
           )}
           {/* National ID Number */}
-          <div className="mb-4">
+          {isUpdate?<></>:<div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nationalId">
               National ID Number
             </label>
@@ -154,7 +178,7 @@ const UpdateDetails = () => {
               placeholder="Enter National ID Number"
               required
             />
-          </div>
+          </div>}
 
           {/* Submit Button */}
           <button
