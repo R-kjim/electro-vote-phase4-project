@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 
 
@@ -7,6 +8,7 @@ export const AppContext=createContext()
 
 const AppContextProvider = (props) => {
     const [isRegistering, setIsRegistering] = useState(false);
+    const [updateStatus,setUpdateStatus]=useState(false)
     const [updateStatus,setUpdateStatus]=useState(false)
     const [userData,setUserData]=useState([])
     const [param,setParam]=useState(null)
@@ -17,7 +19,10 @@ const AppContextProvider = (props) => {
     const [filteredConstituencies,setConstituencies]=useState([])
     const [addWardData,setAddWard]=useState({county:"",constituency:"",name:""})
     const [subNav,setSubNav]=useState("")
+    const [subNav,setSubNav]=useState("")
     const userId=localStorage.getItem("userId")
+    const[candidates,setCandidates]=useState([])
+    
     const[candidates,setCandidates]=useState([])
     
 
@@ -128,6 +133,8 @@ const AppContextProvider = (props) => {
     const value={
         isRegistering, setIsRegistering,userData,setUserData,param,setParam,
         isRegisteredVoter, setIsRegisteredVoter,regions,setRegions,userId,
+        updateStatus,setUpdateStatus,elections,voters,filteredConstituencies,
+        addWardData,setAddWard,subNav,setSubNav,candidates,setCandidates
         updateStatus,setUpdateStatus,elections,voters,filteredConstituencies,
         addWardData,setAddWard,subNav,setSubNav,candidates,setCandidates
 

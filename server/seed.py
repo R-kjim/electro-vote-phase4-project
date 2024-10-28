@@ -75,7 +75,43 @@ def seed_voters(num):
         )
         db.session.add(voter)
 
+    print(f'Inserted {num} fake wards into the database!')
+
+def seed_voters(num):
+    users = User.query.all()
+
+    if len(users) < num:
+        print(f"Not enough users available! You have {len(users)} users but need {num}.")
+        return
+
+    unique_users = random.sample(users, num)  # Ensure unique users
+
+    for i in range(num):
+        voter = Voter(
+            national_id=fake.random_int(min=10000000, max=99999999),
+            user_id=unique_users[i].id,  # Assign a unique user_id
+            registration_date=fake.date_time_this_decade(),
+            county_id=1,  # Adjust this range based on your counties
+            constituency_id=1,  # Adjust based on your constituencies
+            ward_id=random.randint(1, 2)  # Adjust based on your wards
+        )
+        db.session.add(voter)
+
     db.session.commit()
+    print(f'Inserted {num} fake voters into the database!')
+
+
+def seed_elections(num):
+    for _ in range(num):
+        election = Election(
+            name=fake.catch_phrase(),
+            type=random.choice(['General']),
+            status=random.choice(['Pending']),
+            date=fake.date_time_this_decade(),
+            election_date=fake.date(),
+            region=fake.city()
+        )
+        db.session.add(election)
     print(f'Inserted {num} fake voters into the database!')
 
 

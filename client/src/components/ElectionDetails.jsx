@@ -4,11 +4,13 @@ import { AppContext } from '../../AppContext';
 import { toast } from 'react-toastify';
 import politician from '../assets/politician.jpeg'
 import Swal from 'sweetalert2';
+
 const ElectionDetails = () => {
     const [selectedPosition, setSelectedPosition] = useState('');
     const [election,setElection]=useState({})
     const [myVotes,setMyvotes]=useState({})
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
 
     const params=useParams()
     let params1=params.electionId
@@ -20,7 +22,10 @@ const ElectionDetails = () => {
         .then(res=>res.json())
         .then(data=>{setElection(data)
         })
+        .then(data=>{setElection(data)
+        })
     },[])
+    // const handleVote = (name,position) => {
     const positions=["President","Governor","Senator","MP","MCA"]
     const handleVote = (name,position) => {
         // Check if the user already voted
@@ -141,6 +146,44 @@ const ElectionDetails = () => {
         {/* Display Buttons on Larger Screens */}
         <div className="hidden sm:flex items-center justify-center space-x-4">
             {election.type==="General"?<>{positions.map((position, index) => (
+        <nav className="relative mb-4 max-w-7xl sm:px-6 lg:px-8">
+        {/* Dropdown Button for Small Screens */}
+        <div className="sm:hidden mb-2">
+            <button
+                className="w-full p-3 border rounded-lg bg-blue-600 text-white font-semibold"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                aria-label="Toggle positions"
+            >
+                Select Position
+            </button>
+            {isDropdownOpen && (
+                <div className="absolute mt-1 w-full bg-white border rounded-lg shadow-lg z-10">
+                    {positions.map((position, index) => (
+                        <button
+                            key={index}
+                            className={`block w-full text-left p-3 border-b last:border-b-0 ${
+                                myVotes[position]
+                                    ? 'bg-green-600 text-white' // If vote exists, make button green
+                                    : selectedPosition === position
+                                    ? 'bg-blue-600 text-white' // Otherwise, if selected, make button blue
+                                    : 'bg-white text-gray-800' // Default style
+                            } ${myVotes[position] ? '' : 'hover:bg-blue-600'} hover:text-white transition-colors duration-200`}
+                            onClick={() => {
+                                setSelectedPosition(position);
+                                setIsDropdownOpen(false); // Close the dropdown after selection
+                            }}
+                            aria-label={`Select ${position}`}
+                        >
+                            {position}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+
+        {/* Display Buttons on Larger Screens */}
+        <div className="hidden sm:flex items-center justify-center space-x-4">
+            {election.type==="General"?<>{positions.map((position, index) => (
                 <button
                     key={index}
                     className={`p-3 border rounded-lg ${
@@ -190,14 +233,54 @@ const ElectionDetails = () => {
         </button>:null}
     </nav>
 
+            ))}</>:<button
+            className={`p-3 border rounded-lg ${
+                myVotes[election.type]
+                    ? 'bg-green-600 text-white' // If vote exists, make button green
+                    : selectedPosition === election.type
+                    ? 'bg-blue-600 text-white' // Otherwise, if selected, make button blue
+                    : 'bg-white text-gray-800' // Default style
+            } ${myVotes[election.type] ? '' : 'hover:bg-blue-600'} hover:text-white transition-colors duration-200`}
+            onClick={() => setSelectedPosition(election.type)}
+            aria-label={`Select ${election.type}`}
+        >
+            {election.type}
+        </button>
+            }
+            {/* Confirm Vote Button */}
+            {election.type === 'General' && Object.keys(myVotes).length===5 || election.type !== 'General' && Object.keys(myVotes).length!==0?<button
+                className="p-3 border rounded-lg bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition duration-300 ease-in-out"
+                onClick={submitVote}
+                aria-label="Confirm Vote"
+            >
+                Confirm Vote
+            </button>:null}
+        </div>
+
+        {/* Confirm Vote Button for Small Screens */}
+        {election.type === 'General' && Object.keys(myVotes).length===5 ?
+        <button
+            className="sm:hidden w-full mt-2 p-3 border rounded-lg bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700 transition duration-300 ease-in-out"
+            onClick={submitVote}
+            aria-label="Confirm Vote"
+        >
+            Confirm Vote
+        </button>:null}
+    </nav>
+
     );
     return (
         <div className="container mx-auto p-8 bg-gray-100 rounded-lg shadow-lg flex flex-col">
             <header className="text-center mb-6">
                 <h1 className="text-5xl font-bold mb-4 text-gray-800">{election.name} Details</h1>
                 <p className="text-gray-600 mb-4">{election.type === 'General'?"Select a category to vote for your preferred candidate.":`Select your preferred ${election.type} candidate to cast your vote`}</p>
+                <h1 className="text-5xl font-bold mb-4 text-gray-800">{election.name} Details</h1>
+                <p className="text-gray-600 mb-4">{election.type === 'General'?"Select a category to vote for your preferred candidate.":`Select your preferred ${election.type} candidate to cast your vote`}</p>
             </header>
             {/* Show NavBar only if General Election is selected */}
+            {<NavBar />}
+            <div className="mb-8">
+            <h2 className="text-4xl font-bold text-gray-700 mb-4">{election.type==="General"?selectedPosition:election.type}</h2>
             {<NavBar />}
             <div className="mb-8">
             <h2 className="text-4xl font-bold text-gray-700 mb-4">{election.type==="General"?selectedPosition:election.type}</h2>
@@ -270,8 +353,9 @@ const ElectionDetails = () => {
                 }
             </main>
             </div>
+            </div>
         </div>
     );
 };
 
-export default ElectionDetails;
+export default ElectionDetails

@@ -9,7 +9,6 @@ import LoadingPage from './LoadingPage';
 
 const Dashboard = () => {
   const navigate = useNavigate(); // Initialize useNavigate
-  const [voted,setVoted]=useState({})
   const value=useContext(AppContext)
   let params=useParams()
   params=params.id

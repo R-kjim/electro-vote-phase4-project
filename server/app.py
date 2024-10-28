@@ -1,5 +1,7 @@
 from models import db,User,Constituency,County,Ward,Voter,Candidate,Election,Vote
+from models import db,User,Constituency,County,Ward,Voter,Candidate,Election,Vote
 from flask_migrate import Migrate
+from flask import Flask, request, make_response,jsonify
 from flask import Flask, request, make_response,jsonify
 from flask_restful import Api, Resource
 from flask_bcrypt import Bcrypt
@@ -27,7 +29,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://electravote_db_data_user:1
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] =secrets.token_hex(32)
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=30)  
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)  
+app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
+
 app.config['UPLOAD_FOLDER']=UPLOAD_FOLDER
 
 
