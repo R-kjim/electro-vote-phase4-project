@@ -7,7 +7,6 @@ const UpdateDetails = () => {
     const value=useContext(AppContext)
   const regions=value.regions
   const isUpdate=value.updateStatus
-  const isUpdate=value.updateStatus
   const [filteredConstituencies,setConstituencies]=useState([])
   const [filteredWards,setWards]=useState([])
   const [formData, setFormData] = useState({
@@ -39,7 +38,6 @@ const UpdateDetails = () => {
   //form submission logic
   function handleSubmit(event){
     event.preventDefault()
-    if (formData.nationalId.toString().length!==8 && isUpdate===false){
     if (formData.nationalId.toString().length!==8 && isUpdate===false){
         toast.error("Ensure national id number has 8 digits")
     }else{

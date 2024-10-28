@@ -8,6 +8,7 @@ import { FaCheck, FaCheckCircle, FaCheckDouble, FaExclamationCircle} from 'react
 import LoadingPage from './LoadingPage';
 
 const Dashboard = () => {
+  const [voted,setVoted]=useState(0)
   const navigate = useNavigate(); // Initialize useNavigate
   const value=useContext(AppContext)
   let params=useParams()

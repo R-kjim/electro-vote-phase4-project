@@ -40,7 +40,7 @@ const CandidatesAvailable = () => {
       confirmButtonText: 'Proceed',
       cancelButtonText: 'Cancel'
   }).then(res=>{if(res.isConfirmed){
-    fetch(`http://127.0.0.1:5555/candidate/${id}`,{
+    fetch(`https://electra-dummy.onrender.com/candidate/${id}`,{
       method:"DELETE"
     })
     .then(res=>{

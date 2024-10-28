@@ -5,61 +5,61 @@ import Swal from 'sweetalert2';
 import { toast } from 'react-toastify';
 
 const Dashboard1 = () => {
-  const value = useContext(AppContext);
+const value = useContext(AppContext);
 
-  // Filtering elections based on status
-  const filteredOngoing = value.elections.filter((election) => election.status === "Ongoing");
-  const filterPending = value.elections.filter((election) => election.status === "Pending");
+// Filtering elections based on status
+const filteredOngoing = value.elections.filter((election) => election.status === "Ongoing");
+const filterPending = value.elections.filter((election) => election.status === "Pending");
 
-  // State variable to track the visible section
-  const [activeSection, setActiveSection] = useState(null);
-  const [selectCounty,setSelectCounty]=useState("")
-  const [selectConstituency,setselectConstituency]=useState("")
-  const [selectWard,setselectWard]=useState("")
+// State variable to track the visible section
+const [activeSection, setActiveSection] = useState(null);
+const [selectCounty,setSelectCounty]=useState("")
+const [selectConstituency,setselectConstituency]=useState("")
+const [selectWard,setselectWard]=useState("")
 
-  const filteredConstituencies=value.regions.counties.filter((region)=>{
-    if(selectCounty===""){return true}
-    else{return selectCounty===region.name}
-  })
-  const filteredWards=value.regions.constituencies.filter((constituency)=>{
-    if(selectConstituency==="")return constituency.wards
-    else{return selectConstituency===constituency.name}
-  })
-  const filteredVoters=value.voters.filter((voter)=>{
-    if(selectCounty==="" &&selectConstituency==="" && selectWard===""){return true}
-    if(selectCounty!=="" && selectWard==="" && selectConstituency===""){return voter.county.name===selectCounty}
-    if(selectConstituency!=="" && selectCounty!=="" &&selectWard===""){return voter.constituency.name===selectConstituency}
-    if(selectWard!=="" && selectConstituency!=="" && selectCounty!==""){return voter.ward.name===selectWard}
-    // else{return voter.constituency.name===selectConstituency && voter.county.name===selectCounty}
-  })
-  const toggleSection = (section) => {
-    // Toggle the clicked section and hide others
-    setActiveSection(prevSection => (prevSection === section ? null : section));
-  };
+const filteredConstituencies=value.regions.counties.filter((region)=>{
+  if(selectCounty===""){return true}
+  else{return selectCounty===region.name}
+})
+const filteredWards=value.regions.constituencies.filter((constituency)=>{
+  if(selectConstituency==="")return constituency.wards
+  else{return selectConstituency===constituency.name}
+})
+const filteredVoters=value.voters.filter((voter)=>{
+  if(selectCounty==="" &&selectConstituency==="" && selectWard===""){return true}
+  if(selectCounty!=="" && selectWard==="" && selectConstituency===""){return voter.county.name===selectCounty}
+  if(selectConstituency!=="" && selectCounty!=="" &&selectWard===""){return voter.constituency.name===selectConstituency}
+  if(selectWard!=="" && selectConstituency!=="" && selectCounty!==""){return voter.ward.name===selectWard}
+  // else{return voter.constituency.name===selectConstituency && voter.county.name===selectCounty}
+})
+const toggleSection = (section) => {
+  // Toggle the clicked section and hide others
+  setActiveSection(prevSection => (prevSection === section ? null : section));
+};
 
-  function deleteVoter(id,name){
-    Swal.fire({
-      title: 'Warning!',
-      text: `You are about to delete ${name} from the voters list!`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Proceed',
-      cancelButtonText: 'Cancel'
-  }).then(result=>{
-    if(result.isConfirmed){
-      fetch(`http://127.0.0.1:5555/add-voter-details/${id}`,{
-        method:"DELETE"
-      })
-      .then(res=>{
-        if(res.ok){
-          toast.success("Voter deleted successfully")
-          window.location.reload()
-        }
-        return res.json()
-      })
-    }
+function deleteVoter(id,name){
+  Swal.fire({
+    title: 'Warning!',
+    text: `You are about to delete ${name} from the voters list!`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Proceed',
+    cancelButtonText: 'Cancel'
+}).then(result=>{
+  if(result.isConfirmed){
+    fetch(`https://electra-dummy.onrender.com/add-voter-details/${id}`,{
+      method:"DELETE"
+    })
+    .then(res=>{
+      if(res.ok){
+        toast.success("Voter deleted successfully")
+        window.location.reload()
+      }
+      return res.json()
+    })
+  }
   })
   }
   return (
@@ -163,11 +163,8 @@ const Dashboard1 = () => {
                       <td className="py-2 px-4 border">{voter.county.name}</td> {/*Get county voter belongs to*/}
                       <td className="py-2 px-4 border">{voter.constituency.name}</td> {/*Get constituency voter belongs to*/}
                       <td className="py-2 px-4 border">{voter.ward.name}</td> {/*Get ward voter belongs to*/}
-                      <td className="py-2 px-4 border">
-                        <button className="text-red-500 hover:text-red-700" onClick={()=>deleteVoter(voter.id,voter.user.name)}>
-                          <FaTrash className="inline-block mr-2" />
-                          Delete
-                        </button>
+                      <td className="py-2 px-4 border"><button className="text-red-500 hover:text-red-700" onClick={()=>deleteVoter(voter.id,voter.user.name)}>
+                        <FaTrash className="inline-block mr-2" />Delete</button>
                       </td></tr>
                   ))}
                 </tbody>

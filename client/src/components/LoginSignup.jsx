@@ -1,10 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { AppContext } from '../../AppContext';
 import { toast } from 'react-toastify';
-import { Link, useNavigate } from 'react-router-dom';
-import { useFormik } from 'formik';
-import * as yup from "yup";
-
 import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as yup from "yup";
@@ -143,7 +139,6 @@ const LoginSignup = () => {
             required
           />
           <p style={{ color: "red" }}> {formik.errors.email}</p>
-          <p style={{ color: "red" }}> {formik.errors.email}</p>
         </div>
         <div className="mb-4">
           <label className="block text-gray-700">Password</label>
@@ -155,7 +150,6 @@ const LoginSignup = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
             required
           />
-          <p style={{ color: "red" }}> {formik.errors.password}</p>
           <p style={{ color: "red" }}> {formik.errors.password}</p>
         </div>
         {isRegistering && (
@@ -170,7 +164,6 @@ const LoginSignup = () => {
               required
             />
             <p style={{ color: "red" }}> {formik.errors.repeatPassword}</p>
-            <p style={{ color: "red" }}> {formik.errors.repeatPassword}</p>
           </div>
         )}
         <button
@@ -180,13 +173,6 @@ const LoginSignup = () => {
           {isRegistering ? 'Register' : 'Login'}
         </button>
       </form>
-      {!isRegistering && <p className="mt-4 text-center">
-        Forgot password?
-        <Link to='/reset-password'
-          className="text-blue-700 font-semibold ml-1"
-        >Click here
-        </Link>
-      </p>}
       {!isRegistering && <p className="mt-4 text-center">
         Forgot password?
         <Link to='/reset-password'
