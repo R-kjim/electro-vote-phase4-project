@@ -103,7 +103,7 @@ const AdminDashboard = () => {
           <li
             className={`cursor-pointer transition duration-200 hover:text-blue-400 text-xl py-4`}
             onClick={() => {setActiveSection("registerCandidates")
-              setActiveNav(["View Candidates","Register Candidate","Delete Candidate"])
+              setActiveNav(["View Candidates","Register Candidate"])
               setSubNav("View Candidates")
             }}
           >
